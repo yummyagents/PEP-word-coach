@@ -471,7 +471,7 @@ input{font:inherit;color:inherit;}
 
 /* ===== CHARACTER BUBBLE (IP CHARACTER PRESENCE) ===== */
 .char-bubble{
-  position:fixed;bottom:140px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:180px;left:50%;transform:translateX(-50%);
   max-width:340px;width:calc(100% - 40px);
   background:var(--card-bg-solid);
   border:1px solid rgba(255,255,255,0.18);
@@ -1868,6 +1868,21 @@ input{font:inherit;color:inherit;}
 
 /* 目标达成庆祝沿用 zone-celebration，微调主色 */
 .goal-celebration{--zone-color:#FFD93D;}
+
+/* ===== 按钮触感优化 ===== */
+button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
+.flashcard, .map-back-btn, .session-close, .me-book-row, .lib-word-item {
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;
+}
+.btn-next:active, .map-back-btn:active, .session-close:active {
+  transform:scale(0.93)!important;transition:transform 0.08s;
+}
+.tab-item:active{transform:scale(0.92);transition:transform 0.08s;}
+
+/* ===== 学习会话：底部留白避免按钮与气泡重叠 ===== */
+.session-body{padding-bottom:60px!important;}
+.flashcard-nav{margin-bottom:20px;}
 
 </style>
 
@@ -6755,8 +6770,8 @@ function getTotalMastered() { return countUniqueWords(ALL_BOOK_WORDS, isMastered
 function getTotalLearning() {
   return countUniqueWords(ALL_BOOK_WORDS, w => { const ws = wsOf(w); return ws && ws.status !== 'new'; });
 }
-function getBookDepth(bookId) { return getBookMastered(bookId) * METERS_PER_WORD; }
-function getTotalDepthAll() { return getTotalMastered() * METERS_PER_WORD; }
+function getBookDepth(bookId) { return getBookLearning(bookId) * METERS_PER_WORD; }
+function getTotalDepthAll() { return getTotalLearning() * METERS_PER_WORD; }
 function getBookTotalDepth(bookId) { return getBook(bookId).totalWords * METERS_PER_WORD; }
 
 function getCurrentZone(bookId, depth) {
@@ -6802,7 +6817,7 @@ function checkBookUnlocks(celebrate) {
     const prevId = BOOK_ORDER[i-1], curId = BOOK_ORDER[i];
     if (!isBookUnlocked(curId)) {
       const prevBook = getBook(prevId);
-      if (getBookMastered(prevId) >= Math.ceil(prevBook.totalWords * 0.6)) {
+      if (getBookLearning(prevId) >= Math.ceil(prevBook.totalWords * 0.6)) {
         state.unlockedBooks.push(curId);
         newly.push(curId);
       }
@@ -7745,9 +7760,9 @@ function showNewWord() {
   const wasNew = ws.status === 'new';
   if (wasNew) { ws.status = 'learning'; ws.firstSeen = getToday(); }
   saveState();
-  if (wasNew) checkDailyGoal();
   renderGoalStrip();
   showCharBubble('burger', '这个单词是 "' + w.word + '"，点击卡片看看吧！');
+  if (wasNew) setTimeout(checkDailyGoal, 800);
 }
 
 function flipCard() {
@@ -8465,6 +8480,8 @@ function init() {
   updateLearnWelcome();
   renderUnitGrid();
   renderGoalStrip();
+  renderLibrary();
+  renderMe();
   updateHeader();
   const sndBtn = document.getElementById('soundToggle');
   if (sndBtn) sndBtn.textContent = soundOn() ? '🔊' : '🔇';
