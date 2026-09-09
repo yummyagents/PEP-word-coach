@@ -1921,9 +1921,9 @@ input{font:inherit;color:inherit;}
         <p id="learnSubtitle">点击单元卡片，开始今天的深海单词之旅吧！</p>
         <img class="deco-book" src="assets/magic_book.jpg" alt="单词魔法书" style="position:relative;display:block;margin:16px auto 0;width:100px;opacity:0.35;filter:brightness(1.1) drop-shadow(0 0 8px rgba(79,195,247,0.3));">
       </div>
-      <button class="map-entry-btn" onclick="openMapOverlay()">
+      <button class="map-entry-btn" onclick="toggleMapView()" id="mapViewToggleBtn">
         <span class="map-btn-icon">🗺️</span>
-        <span>查看探索地图</span>
+        <span id="mapBtnText">查看探索地图</span>
         <span class="map-btn-hint" id="mapBtnHint">0米</span>
       </button>
       <div class="daily-goal-strip" id="dailyGoalStrip">
@@ -6992,7 +6992,7 @@ const CHARACTERS = {
     ]
   },
   shelly: {
-    name: '海龟姐姐', cls: 'shelly', img: 'assets/hero_popcorn.jpg',
+    name: '海龟姐姐', cls: 'shelly', img: 'assets/hero_turtle.jpg',
     review: [
       "慢慢来，不着急，我们一步一步复习～",
       "还记得这些老朋友吗？让我们再打个招呼吧。",
@@ -7420,11 +7420,38 @@ function startSession(bookId, unitId, reviewOnly) {
         showCharBubble('shelly', '这个子海域的单词你都学过了，去挑战下一片海域吧！');
       }
     } else {
-      showCharBubble('fries', '🎯 今日新词目标（' + (state.settings.dailyGoal === 99 ? '不限' : state.settings.dailyGoal + '词') +
-        '）已经达成啦！今天先来复习巩固吧～', 4200);
-      setTimeout(() => startSession(bookId, unitId, true), 1400);
+      // 今日配额用完但还有新词：弹选择窗口，不强制拦
+      showModal('🎯 今日目标已达成',
+        '你今天已经完成了新词目标，还要继续学新词吗？',
+        [
+          { text: '📚 继续学新词', cls: 'primary', action: function(){
+              // 超额模式：直接发最多4个新词，不再查配额
+              const extraWords = unlearned.slice(0, 4);
+              const reviewWords = reviewCandidates.slice(0, 8);
+              if (extraWords.length === 0 && reviewWords.length === 0) {
+                showCharBubble('shelly', '没有需要学习或复习的单词哦～');
+                closeModal();
+                return;
+              }
+              session = { bookId, unitId, unitName: unit.unit_name,
+                newWords: extraWords.map(w => ({...w})),
+                reviewWords: reviewWords.map(w => ({...w})),
+                phase: 'intro', newIdx:0, quizIdx:0, reviewIdx:0,
+                results: { newCorrect:0, newTotal:0, reviewResults:[] },
+                _startDepth: getBookDepth(bookId),
+                _unlockedAtStart: state.unlockedBooks.slice() };
+              document.getElementById('sessionOverlay').classList.add('active');
+              closeModal();
+              SFX.pop();
+              showCharEntrance('burger');
+              setTimeout(() => showCharBubble('burger', '超额挑战！继续探索新单词吧～', 2500), 1200);
+              setTimeout(() => showPhase(), 1800);
+            }
+          },
+          { text: '🔄 今天先复习', action: function(){ closeModal(); startSession(bookId, unitId, true); } }
+        ], true);
+      return;
     }
-    return;
   }
   const reviewWords = reviewCandidates.slice(0, 8);
 
@@ -8043,7 +8070,7 @@ function showSummary() {
       '</div></div>';
 
   showCharEntrance('fries');
-  setTimeout(() => showCharBubble('fries', encourageMsg, 5000), 800);
+  // report 已有 encourageMsg，不再弹 charBubble（避免与底部按钮重叠）
 }
 
 function continueLearning() {
@@ -8449,12 +8476,16 @@ function init() {
     return;
   }
 
-  // 全局到期复习提醒
+  // 欢迎完成后直接进入地图（地图变主入口）
+  // 隐藏单元网格，显示全屏地图
+  openMapOverlay();
+
+  // 全局到期复习提醒（延迟到地图关闭后）
   const reviewWords = getReviewWords();
   if (reviewWords.length > 0) {
     setTimeout(() => {
       showCharBubble('shelly', '有 ' + reviewWords.length + ' 个单词该复习啦，去学习页面看看吧～', 4000);
-    }, 1500);
+    }, 2000);
   }
 }
 
@@ -8469,7 +8500,7 @@ function showOnboarding() {
       { img: 'assets/hero_fries.jpg',  name: '薯条厨娘' },
       { img: 'assets/hero_popcorn.jpg', name: '鸡米花小弟' },
       { img: 'assets/octo_professor.jpg', name: '章鱼教授' },
-      { img: 'assets/hero_popcorn.jpg', name: '海龟姐姐' }
+      { img: 'assets/hero_turtle.jpg', name: '海龟姐姐' }
     ];
     row.innerHTML = chars.map(c =>
       '<div class="ob-char"><img src="' + c.img + '" alt="' + c.name + '" onerror="this.style.background=\'linear-gradient(135deg,var(--bio-blue),var(--bio-green))\';this.style.padding=\'8px\';"><div class="ob-char-name">' + c.name + '</div></div>'
@@ -8499,12 +8530,8 @@ function nextOnboardSlide() {
 function finishOnboarding() {
   localStorage.setItem('deepsea_welcomed', '1');
   document.getElementById('onboardOverlay').classList.remove('active');
-  setTimeout(() => {
-    const reviewWords = getReviewWords();
-    if (reviewWords.length > 0) {
-      showCharBubble('shelly', '有 ' + reviewWords.length + ' 个单词该复习啦，去学习页面看看吧～', 4000);
-    }
-  }, 800);
+  // onboarding 结束后直接进入地图（主入口）
+  setTimeout(() => openMapOverlay(), 600);
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -8522,6 +8549,34 @@ function openMapOverlay() {
 
 function closeMapOverlay() {
   document.getElementById('mapOverlay').classList.remove('active');
+  updateMapViewButton();
+}
+
+function toggleMapView() {
+  const overlay = document.getElementById('mapOverlay');
+  if (overlay.classList.contains('active')) {
+    // 地图打开中 → 关闭地图，显示单元网格
+    closeMapOverlay();
+  } else {
+    // 地图关闭中 → 打开地图
+    mapLevel = 'books';
+    renderMapOverlay();
+    overlay.classList.add('active');
+  }
+  updateMapViewButton();
+}
+
+function updateMapViewButton() {
+  const overlay = document.getElementById('mapOverlay');
+  const btnText = document.getElementById('mapBtnText');
+  const btnIcon = document.querySelector('.map-btn-icon');
+  if (overlay && overlay.classList.contains('active')) {
+    if (btnText) btnText.textContent = '单元列表';
+    if (btnIcon) btnIcon.textContent = '📚';
+  } else {
+    if (btnText) btnText.textContent = '查看探索地图';
+    if (btnIcon) btnIcon.textContent = '🗺️';
+  }
 }
 
 function handleMapBack() {
