@@ -1884,6 +1884,135 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
 .session-body{padding-bottom:60px!important;}
 .flashcard-nav{margin-bottom:20px;}
 
+/* ===== 云同步：手机号登录弹窗 ===== */
+.phone-modal{
+  position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+}
+.phone-modal-backdrop{
+  position:absolute;inset:0;background:rgba(0,10,30,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.phone-modal-content{
+  position:relative;z-index:1;width:90%;max-width:340px;padding:36px 24px 28px;
+  background:linear-gradient(160deg,rgba(10,40,80,0.95),rgba(5,20,50,0.98));
+  border:1.5px solid rgba(79,195,247,0.25);border-radius:24px;
+  text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(79,195,247,0.1);
+}
+.phone-modal-icon{font-size:48px;margin-bottom:8px;}
+.phone-modal-title{font-size:22px;font-weight:700;color:#E3F2FD;margin-bottom:4px;}
+.phone-modal-sub{font-size:13px;color:rgba(179,229,252,0.7);margin-bottom:20px;}
+.phone-modal-input-wrap{margin-bottom:12px;}
+.phone-input{
+  width:100%;padding:14px 16px;font-size:18px;letter-spacing:2px;text-align:center;
+  background:rgba(255,255,255,0.06);border:1.5px solid rgba(79,195,247,0.2);border-radius:14px;
+  color:#E3F2FD;outline:none;transition:border-color .2s;box-sizing:border-box;
+  -webkit-appearance:none;appearance:none;
+}
+.phone-input:focus{border-color:rgba(79,195,247,0.6);}
+.phone-input::placeholder{color:rgba(179,229,252,0.35);letter-spacing:1px;}
+.phone-modal-error{font-size:12px;color:#FF8A80;min-height:18px;margin-bottom:4px;}
+.phone-modal-btn{
+  width:100%;padding:14px;font-size:16px;font-weight:600;color:#fff;
+  background:linear-gradient(135deg,#00BCD4,#4FC3F7);border:none;border-radius:14px;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  box-shadow:0 4px 16px rgba(0,188,212,0.3);
+}
+.phone-modal-btn:active{transform:scale(0.96);}
+.phone-modal-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.phone-modal-hint{font-size:11px;color:rgba(179,229,252,0.45);margin-top:14px;}
+
+/* ===== 云同步状态指示 ===== */
+.sync-status{
+  position:fixed;top:8px;right:8px;z-index:9000;
+  display:flex;align-items:center;gap:4px;padding:4px 10px;
+  background:rgba(0,30,60,0.8);border-radius:20px;font-size:11px;color:rgba(179,229,252,0.8);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(79,195,247,0.15);
+  transition:opacity .3s;
+}
+.sync-status.synced{opacity:0;pointer-events:none;}
+
+/* ===== 我的页：学号显示 ===== */
+.my-phone-display{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;margin:8px 0;
+  background:rgba(79,195,247,0.06);border-radius:12px;
+  border:1px solid rgba(79,195,247,0.12);
+}
+.my-phone-display .phone-label{font-size:12px;color:rgba(179,229,252,0.6);}
+.my-phone-display .phone-value{font-size:15px;font-weight:600;color:#4FC3F7;letter-spacing:1px;}
+/* ===== 错词本入口 ===== */
+.me-wrong-words-entry{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;margin:12px 0;
+  background:linear-gradient(135deg,rgba(255,107,107,0.10),rgba(255,179,71,0.08));
+  border:1.5px solid rgba(255,107,107,0.25);border-radius:16px;cursor:pointer;
+  transition:all .2s;
+}
+.me-wrong-words-entry:active{transform:scale(0.98);}
+.mww-icon{font-size:28px;flex-shrink:0;}
+.mww-info{flex:1;min-width:0;}
+.mww-title{font-size:14px;font-weight:700;color:var(--text-primary);}
+.mww-count{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.mww-arrow{font-size:18px;color:var(--bio-green);font-weight:700;}
+
+/* ===== 本周学习概览 ===== */
+.me-weekly-overview{
+  padding:14px 16px;margin:12px 0;
+  background:rgba(79,195,247,0.06);border:1px solid rgba(79,195,247,0.12);
+  border-radius:16px;
+}
+.me-weekly-title{font-size:14px;font-weight:700;color:var(--bio-blue);margin-bottom:12px;text-align:center;}
+.me-weekly-stats{display:flex;justify-content:space-around;gap:8px;}
+.me-weekly-item{text-align:center;}
+.mwi-num{font-size:22px;font-weight:800;color:var(--bio-green);}
+.mwi-label{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+
+/* ===== 薄弱单词TOP5 ===== */
+.me-weak-words{
+  padding:14px 16px;margin:12px 0;
+  background:rgba(255,107,107,0.05);border:1px solid rgba(255,107,107,0.12);
+  border-radius:16px;
+}
+.me-weak-title{font-size:14px;font-weight:700;color:#FF8A65;margin-bottom:10px;text-align:center;}
+.me-weak-item{
+  display:flex;align-items:center;gap:8px;padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.me-weak-item:last-child{border-bottom:none;}
+.mwi-rank{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(255,107,107,0.2);color:#FF8A65;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.mwi-word{font-size:13px;font-weight:600;color:var(--text-primary);min-width:60px;}
+.mwi-meaning{font-size:12px;color:var(--text-secondary);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mwi-count{font-size:11px;color:#FF6B6B;font-weight:600;flex-shrink:0;}
+
+/* ===== 音节拆分展示 ===== */
+.word-syllable{
+  text-align:center;font-size:16px;font-weight:600;
+  color:var(--bio-blue);letter-spacing:2px;margin:4px 0 2px;
+  opacity:0.85;
+}
+
+/* ===== 答题反馈闪烁 ===== */
+.answer-correct-flash{
+  animation:correctFlash 0.6s ease;
+}
+@keyframes correctFlash{
+  0%{background:transparent;}
+  30%{background:rgba(22,219,147,0.08);}
+  100%{background:transparent;}
+}
+.answer-wrong-flash{
+  animation:wrongFlash 0.8s ease;
+}
+@keyframes wrongFlash{
+  0%{background:transparent;}
+  30%{background:rgba(255,107,107,0.06);}
+  100%{background:transparent;}
+}
+
 </style>
 
 </head>
@@ -2080,6 +2209,30 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
   </div>
 </div>
 
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+
+<!-- Phone Login Modal -->
+<div class="phone-modal" id="phoneModal" style="display:none">
+  <div class="phone-modal-backdrop"></div>
+  <div class="phone-modal-content">
+    <div class="phone-modal-icon">🌊</div>
+    <div class="phone-modal-title">深海学院单词教练</div>
+    <div class="phone-modal-sub">输入手机号，开启深海探险之旅</div>
+    <div class="phone-modal-input-wrap">
+      <input type="tel" id="phoneInput" class="phone-input" placeholder="请输入手机号" maxlength="11" autocomplete="tel">
+    </div>
+    <div class="phone-modal-error" id="phoneError"></div>
+    <button class="phone-modal-btn" id="phoneSubmitBtn" onclick="handlePhoneLogin()">开始探险 🚀</button>
+    <div class="phone-modal-hint">学习进度自动保存，换设备也能继续</div>
+  </div>
+</div>
+
+<!-- Cloud Sync Status -->
+<div class="sync-status" id="syncStatus" style="display:none">
+  <span class="sync-icon" id="syncIcon">☁️</span>
+  <span class="sync-text" id="syncText">同步中...</span>
+</div>
 
 <script>
 // ============================================================
@@ -6674,7 +6827,8 @@ let state = {
   lastStudyDate: null,
   totalDays: 0,
   unlockedBooks: ['g3u'],   // 已解锁大海域
-  currentBookId: 'g3u'
+  currentBookId: 'g3u',
+  wrongWords: []            // 错词本
 };
 
 function loadState() {
@@ -6708,6 +6862,8 @@ function migrateState() {
   // 旧历史记录补 bookId
   (state.history || []).forEach(h => { if (!h.bookId) { h.bookId = 'g3u'; migrated = true; } });
   currentBookId = state.currentBookId;
+  // 错词本兼容
+  if (!Array.isArray(state.wrongWords)) { state.wrongWords = []; }
   // 依据已有进度解锁海域（保护回归用户）
   checkBookUnlocks(false);
   if (migrated) saveState();
@@ -6716,6 +6872,201 @@ function migrateState() {
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   catch(e) { console.warn('Save state error', e); }
+  // 云同步（防抖）
+  scheduleCloudSave();
+}
+
+// ===== CLOUD SYNC (Supabase) =====
+// 配置占位——部署时替换为真实的 Supabase URL 和 anon key
+const SUPABASE_URL = '__SUPABASE_URL__';
+const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
+let supabaseClient = null;
+let userPhone = localStorage.getItem('deepsea_phone') || '';
+let cloudSaveTimer = null;
+let isSyncing = false;
+
+function initSupabase() {
+  if (SUPABASE_URL === '__SUPABASE_URL__' || typeof window.supabase === 'undefined') {
+    console.warn('[Cloud] Supabase not configured, using local-only mode');
+    return false;
+  }
+  try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return true;
+  } catch(e) {
+    console.warn('[Cloud] Supabase init error', e);
+    return false;
+  }
+}
+
+function scheduleCloudSave() {
+  if (!supabaseClient || !userPhone) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(cloudSave, 2000);
+}
+
+async function cloudSave() {
+  if (!supabaseClient || !userPhone || isSyncing) return;
+  isSyncing = true;
+  showSyncStatus('saving');
+  try {
+    const { error } = await supabaseClient
+      .from('user_progress')
+      .upsert({
+        phone: userPhone,
+        state_data: state,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'phone' });
+    if (error) throw error;
+    showSyncStatus('saved');
+  } catch(e) {
+    console.warn('[Cloud] Save error', e);
+    showSyncStatus('error');
+  }
+  isSyncing = false;
+}
+
+async function cloudLoad(phone) {
+  if (!supabaseClient) return null;
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_progress')
+      .select('state_data')
+      .eq('phone', phone)
+      .single();
+    if (error || !data) return null;
+    return data.state_data;
+  } catch(e) {
+    console.warn('[Cloud] Load error', e);
+    return null;
+  }
+}
+
+function mergeState(local, cloud) {
+  // 合并策略：以云端为基础，本地进度合并进去
+  // 单词状态：取 interval/reps 更大的（学得更深的）
+  if (!cloud) return local;
+  const merged = { ...cloud };
+  // 合并单词进度
+  Object.keys(local.words || {}).forEach(k => {
+    const l = local.words[k];
+    const c = merged.words && merged.words[k];
+    if (!c) {
+      if (!merged.words) merged.words = {};
+      merged.words[k] = l;
+    } else {
+      // 取间隔更大或状态更高的
+      merged.words[k] = (l.interval || 0) > (c.interval || 0) ? l : c;
+    }
+  });
+  // 合并解锁海域
+  if (local.unlockedBooks) {
+    const set = new Set([...(merged.unlockedBooks || []), ...local.unlockedBooks]);
+    merged.unlockedBooks = Array.from(set);
+  }
+  // 合并历史记录（去重）
+  const histMap = {};
+  (merged.history || []).forEach(h => { histMap[h.date + h.bookId + h.unitId] = h; });
+  (local.history || []).forEach(h => { histMap[h.date + h.bookId + h.unitId] = h; });
+  merged.history = Object.values(histMap);
+  // streak 取大的
+  merged.streak = Math.max(local.streak || 0, merged.streak || 0);
+  merged.totalDays = Math.max(local.totalDays || 0, merged.totalDays || 0);
+  return merged;
+}
+
+function showSyncStatus(status) {
+  const el = document.getElementById('syncStatus');
+  const icon = document.getElementById('syncIcon');
+  const text = document.getElementById('syncText');
+  if (!el) return;
+  if (status === 'saving') {
+    el.style.display = 'flex'; el.classList.remove('synced');
+    icon.textContent = '☁️'; text.textContent = '同步中...';
+  } else if (status === 'saved') {
+    icon.textContent = '✅'; text.textContent = '已同步';
+    setTimeout(() => { el.classList.add('synced'); }, 1500);
+  } else if (status === 'error') {
+    icon.textContent = '⚠️'; text.textContent = '同步失败';
+    setTimeout(() => { el.classList.add('synced'); }, 3000);
+  } else if (status === 'loaded') {
+    el.style.display = 'flex'; el.classList.remove('synced');
+    icon.textContent = '✅'; text.textContent = '云端数据已恢复';
+    setTimeout(() => { el.classList.add('synced'); }, 2000);
+  }
+}
+
+function showPhoneModal() {
+  const modal = document.getElementById('phoneModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function hidePhoneModal() {
+  const modal = document.getElementById('phoneModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function validatePhone(phone) {
+  return /^1[3-9]\d{9}$/.test(phone);
+}
+
+async function handlePhoneLogin() {
+  const input = document.getElementById('phoneInput');
+  const errEl = document.getElementById('phoneError');
+  const btn = document.getElementById('phoneSubmitBtn');
+  if (!input || !errEl || !btn) return;
+  const phone = input.value.trim();
+  if (!validatePhone(phone)) {
+    errEl.textContent = '请输入正确的11位手机号';
+    return;
+  }
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '连接中...';
+  
+  // 保存手机号到本地
+  userPhone = phone;
+  localStorage.setItem('deepsea_phone', phone);
+  
+  // 尝试从云端加载
+  const cloudData = await cloudLoad(phone);
+  if (cloudData) {
+    // 云端有数据，合并
+    state = mergeState(state, cloudData);
+    saveState(); // 保存合并后的数据到本地（不触发再次云同步）
+    showSyncStatus('loaded');
+  }
+  
+  hidePhoneModal();
+  btn.disabled = false;
+  btn.textContent = '开始探险 🚀';
+  
+  // 继续初始化流程
+  afterLogin();
+}
+
+function afterLogin() {
+  renderBookPills();
+  updateLearnWelcome();
+  renderUnitGrid();
+  renderGoalStrip();
+  renderLibrary();
+  renderMe();
+  updateHeader();
+  
+  if (!localStorage.getItem('deepsea_welcomed')) {
+    showOnboarding();
+    return;
+  }
+  openMapOverlay();
+  
+  // 到期复习提醒
+  const reviewWords = getReviewWords();
+  if (reviewWords.length > 0) {
+    setTimeout(() => {
+      showCharBubble('shelly', '有 ' + reviewWords.length + ' 个单词该复习啦，去学习页面看看吧～', 4000);
+    }, 2000);
+  }
 }
 
 function wsOf(w) { return state.words[wkey(w)]; }
@@ -6805,7 +7156,7 @@ function isUnitUnlocked(bookId, unitId) {
   const prevUnit = getUnit(bookId, unitId - 1);
   if (!prevUnit) return true;
   const prevMastered = getUnitMasteredCount(bookId, unitId - 1);
-  return prevMastered >= Math.ceil(prevUnit.words.length * 0.6);
+  return prevMastered >= Math.ceil(prevUnit.words.length * 0.3);
 }
 
 // ===== 册（大海域）解锁：前一册 mastered ≥ 该册总词数 60% =====
@@ -6817,7 +7168,7 @@ function checkBookUnlocks(celebrate) {
     const prevId = BOOK_ORDER[i-1], curId = BOOK_ORDER[i];
     if (!isBookUnlocked(curId)) {
       const prevBook = getBook(prevId);
-      if (getBookLearning(prevId) >= Math.ceil(prevBook.totalWords * 0.6)) {
+      if (getBookLearning(prevId) >= Math.ceil(prevBook.totalWords * 0.4)) {
         state.unlockedBooks.push(curId);
         newly.push(curId);
       }
@@ -6906,6 +7257,52 @@ function onWordMasteredInSession() {
   SFX.dive();
   showDepthToast(session.bookId, newDepth);
   checkZoneArrival(session.bookId, newDepth);
+}
+
+
+// ===== 音节拆分（优先覆盖三上106词） =====
+const SYLLABLES = {
+  // 三上 g3u 常见单词音节拆分
+  'apple':'ap·ple', 'banana':'ba·na·na', 'elephant':'el·e·phant',
+  'brother':'bro·ther', 'sister':'sis·ter', 'grandma':'grand·ma',
+  'grandpa':'grand·pa', 'family':'fam·i·ly', 'mother':'moth·er',
+  'father':'fa·ther', 'animal':'an·i·mal', 'rabbit':'rab·bit',
+  'monkey':'mon·key', 'tiger':'ti·ger', 'giraffe':'gi·raffe',
+  'orange':'or·ange', 'flower':'flow·er', 'garden':'gar·den',
+  'water':'wa·ter', 'purple':'pur·ple', 'yellow':'yel·low',
+  'picture':'pic·ture', 'cousin':'cou·sin', 'people':'peo·ple',
+  'children':'chil·dren', 'together':'to·geth·er', 'weather':'weath·er',
+  'sunny':'sun·ny', 'happy':'hap·py', 'funny':'fun·ny',
+  'candy':'can·dy', 'body':'bo·dy', 'party':'par·ty',
+  'puppy':'pup·py', 'kitty':'kit·ty', 'birdie':'bir·die',
+  'me':'me', 'friend':'friend', 'smile':'smile', 'ear':'ear',
+  'eye':'eye', 'hand':'hand', 'mouth':'mouth', 'arm':'arm',
+  'mum':'mum', 'dad':'dad', 'baby':'ba·by', 'pet':'pet',
+  'dog':'dog', 'cat':'cat', 'fish':'fish', 'bird':'bird',
+  'fox':'fox', 'panda':'pan·da', 'lion':'li·on', 'bear':'bear',
+  'duck':'duck', 'name':'name', 'nice':'nice', 'can':'can',
+  'share':'share', 'listen':'lis·ten', 'help':'help', 'say':'say',
+  'good':'good', 'have':'have', 'big':'big', 'small':'small',
+  'like':'like', 'go':'go', 'Miss':'Miss', 'cute':'cute',
+  'tall':'tall', 'fast':'fast', 'new':'new', 'need':'need',
+  'give':'give', 'them':'them', 'colour':'col·our', 'make':'make',
+  'draw':'draw', 'old':'old', 'year':'year', 'plant':'plant',
+  'one':'one', 'two':'two', 'three':'three', 'four':'four',
+  'five':'five', 'six':'six', 'seven':'sev·en', 'eight':'eight',
+  'nine':'nine', 'ten':'ten', 'o\'clock':'o\'clock',
+  'cut':'cut', 'eat':'eat', 'some':'some', 'cake':'cake',
+  'red':'red', 'blue':'blue', 'green':'green', 'pink':'pink',
+  'brown':'brown', 'white':'white', 'black':'black',
+  'sea':'sea', 'zoo':'zoo', 'sun':'sun', 'tree':'tree',
+  'grass':'grass', 'farm':'farm', 'air':'air',
+  'grape':'grape', 'apple':'ap·ple'
+};
+
+function syllableHtml(word) {
+  var lower = word.toLowerCase();
+  var syll = SYLLABLES[lower];
+  if (!syll) return '';
+  return '<div class="word-syllable">' + syll + '</div>';
 }
 
 // ===== EXAMPLE SENTENCES =====
@@ -7333,7 +7730,7 @@ function switchBook(bookId) {
     const idx = BOOK_ORDER.indexOf(bookId);
     const prev = getBook(BOOK_ORDER[idx - 1]);
     const need = Math.ceil(prev.totalWords * 0.6);
-    showCharBubble('octo', '🔒 完成《' + prev.grade + '》60%（掌握' + need + '词）后，' +
+    showCharBubble('octo', '🔒 完成《' + prev.grade + '》40%（掌握' + need + '词）后，' +
       getBook(bookId).expeditionName + ' 就会解锁哦！');
     return;
   }
@@ -7493,6 +7890,57 @@ function startSession(bookId, unitId, reviewOnly) {
   showCharEntrance('burger');
   setTimeout(() => showCharBubble('burger', pickRandom(CHARACTERS.burger.intros)), 1200);
   setTimeout(() => showPhase(), 1500);
+}
+
+
+// ===== 错词本复习 =====
+function startWrongWordReview() {
+  if (!state.wrongWords || state.wrongWords.length === 0) {
+    showCharBubble('shelly', '错词本里还没有单词，继续加油学习吧！', 3000);
+    return;
+  }
+  // 从错词本中取最多8个单词进行复习
+  const words = state.wrongWords.slice(-8).map(function(ww) {
+    // 从词库中找到原始单词数据
+    var orig = ALL_BOOK_WORDS.find(function(w) { return w.bookId === ww.bookId && w.word === ww.word; });
+    if (orig) return Object.assign({}, orig, { bookId: ww.bookId, unit_id: ww.unit_id || 1 });
+    // 兜底：如果词库中找不到，用错词记录本身
+    return { word: ww.word, meaning: ww.meaning, phonetic: '', pos: '', bookId: ww.bookId, unit_id: ww.unit_id || 1 };
+  }).filter(Boolean);
+  
+  if (words.length === 0) {
+    showCharBubble('shelly', '错词本数据异常，请重新学习。', 3000);
+    return;
+  }
+  
+  const bookId = words[0].bookId;
+  const unitId = words[0].unit_id;
+  
+  session = {
+    bookId: bookId,
+    unitId: unitId,
+    unitName: '错词复习',
+    newWords: [],
+    reviewWords: words,
+    phase: 'review',
+    newIdx: 0, quizIdx: 0, reviewIdx: 0,
+    results: { newCorrect: 0, newTotal: 0, reviewResults: [] },
+    _startDepth: getBookDepth(bookId),
+    _unlockedAtStart: state.unlockedBooks.slice(),
+    _isWrongWordReview: true
+  };
+  
+  document.getElementById('sessionOverlay').classList.add('active');
+  SFX.pop();
+  showCharEntrance('shelly');
+  setTimeout(function() { showCharBubble('shelly', '错词复习开始！一共 ' + words.length + ' 个单词，加油！', 2500); }, 800);
+  setTimeout(function() { showPhase(); }, 1500);
+}
+
+function clearWrongWord(word) {
+  if (!state.wrongWords) return;
+  state.wrongWords = state.wrongWords.filter(function(ww) { return ww.word !== word; });
+  saveState();
 }
 
 // ===== 每日目标（与学习流程打通） =====
@@ -7739,6 +8187,7 @@ function showNewWord() {
         wordVisualHtml(w, 'wv-flash') +
         '<button class="speak-btn" onclick="event.stopPropagation();speakWord(\'' + esc + '\')">🔊</button>' +
         '<div class="flashcard-word">' + w.word + '</div>' +
+        syllableHtml(w.word) +
         '<div class="flashcard-phonetic">' + w.phonetic + '</div>' +
         '<div class="flashcard-hint">✨ 点卡片翻面看释义 ✨</div>' +
       '</div>' +
@@ -7985,7 +8434,14 @@ function handleQuizAnswer(btn, correctWord) {
     document.querySelectorAll('.quiz-option').forEach(b => {
       if (b.dataset.answer === correctWord) b.classList.add('correct');
     });
-    if (wObj) sm2Review(wObj, 1);
+    if (wObj) {
+      sm2Review(wObj, 1);
+      // 记录错词
+      const wrongEntry = { bookId: session.bookId, unit_id: session.unitId, word: wObj.word, meaning: wObj.meaning, time: Date.now() };
+      state.wrongWords = state.wrongWords.filter(function(ww) { return !(ww.bookId === wrongEntry.bookId && ww.word === wrongEntry.word); });
+      state.wrongWords.push(wrongEntry);
+      saveState();
+    }
     showWrongFeedback(correctWord);
   }
 }
@@ -7993,12 +8449,19 @@ function handleQuizAnswer(btn, correctWord) {
 function showCorrectFeedback(word) {
   const char = Math.random() > 0.5 ? 'fries' : 'timmy';
   showCharBubble(char, pickRandom(CHARACTERS[char].correct));
+  // 绿色闪烁效果
+  var body = document.getElementById('sessionBody');
+  if (body) { body.classList.add('answer-correct-flash'); setTimeout(function() { body.classList.remove('answer-correct-flash'); }, 600); }
   setTimeout(() => { session.quizIdx++; showPhase(); }, 1800);
 }
 
 function showWrongFeedback(word) {
   const char = Math.random() > 0.5 ? 'timmy' : 'burger';
-  showCharBubble(char, pickRandom(CHARACTERS[char].wrong) + ' 正确答案是 "' + word + '"。');
+  // 温和提示，不直接显示"错误"
+  showCharBubble(char, pickRandom(CHARACTERS[char].wrong) + ' 没关系，正确答案是 "' + word + '"，记住它吧～');
+  // 柔和红色闪烁
+  var body = document.getElementById('sessionBody');
+  if (body) { body.classList.add('answer-wrong-flash'); setTimeout(function() { body.classList.remove('answer-wrong-flash'); }, 800); }
   setTimeout(() => speakWord(word), 600);
   setTimeout(() => { session.quizIdx++; showPhase(); }, 3000);
 }
@@ -8028,6 +8491,13 @@ function handleReview(quality) {
   if (!session) return;
   const w = session.reviewWords[session.reviewIdx];
   sm2Review(w, quality);
+  // 答错时记录错词本
+  if (quality < 3) {
+    const wrongEntry = { bookId: session.bookId, unit_id: session.unitId, word: w.word, meaning: w.meaning, time: Date.now() };
+    state.wrongWords = state.wrongWords.filter(function(ww) { return !(ww.bookId === wrongEntry.bookId && ww.word === wrongEntry.word); });
+    state.wrongWords.push(wrongEntry);
+    saveState();
+  }
   session.results.reviewResults.push({ word: w.word, quality });
   session.reviewIdx++;
   showPhase();
@@ -8103,15 +8573,18 @@ function continueLearning() {
 let libViewingUnit = null;
 
 function renderLibrary() {
+  try {
   const list = document.getElementById('libUnitList');
   const wordList = document.getElementById('libWordList');
   const search = document.getElementById('libSearch');
   const caption = document.getElementById('libCaption');
+  if (!list || !wordList) { console.warn('renderLibrary: DOM elements not found'); return; }
   wordList.classList.add('hidden');
   list.classList.remove('hidden');
   if (search) search.value = '';
 
   const book = currentBook();
+  if (!book || !book.units || book.units.length === 0) { console.warn('renderLibrary: no units'); return; }
   if (caption) caption.textContent = '当前词库：' + book.grade + '《' + book.expeditionName + '》' + book.totalWords + '词 · 搜索可跨全部6册';
 
   list.innerHTML = '';
@@ -8134,6 +8607,7 @@ function renderLibrary() {
         '</svg></div>';
     list.appendChild(card);
   });
+  } catch(e) { console.warn('renderLibrary error:', e); }
 }
 
 function showUnitDetail(unitId) {
@@ -8221,11 +8695,65 @@ function renderMe() {
       '<div class="mbr-emoji">' + (unlocked ? b.expeditionEmoji : '🔒') + '</div>' +
       '<div class="mbr-info">' +
         '<div class="mbr-name">' + b.shortName + ' · ' + b.expeditionName + '</div>' +
-        '<div class="mbr-meta">' + b.grade + ' · ' + (unlocked ? (m + '/' + b.totalWords + '词 · ' + d + '/' + (b.totalWords*METERS_PER_WORD) + '米') : '完成上一册60%后解锁') + '</div>' +
+        '<div class="mbr-meta">' + b.grade + ' · ' + (unlocked ? (m + '/' + b.totalWords + '词 · ' + d + '/' + (b.totalWords*METERS_PER_WORD) + '米') : '完成上一册40%后解锁') + '</div>' +
         '<div class="mbr-bar"><div class="mbr-fill" style="width:' + (unlocked ? pct : 0) + '%;"></div></div>' +
       '</div>' +
       '<div class="mbr-pct">' + (unlocked ? pct + '%' : '🔒') + '</div></div>';
   }).join('');
+
+  // 手机号显示（云同步状态）
+  const phoneHtml = userPhone ?
+    '<div class="my-phone-display">' +
+      '<span class="phone-label">☁️ 学习账号</span>' +
+      '<span class="phone-value">' + userPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + '</span>' +
+    '</div>' :
+    (supabaseClient ?
+      '<div class="my-phone-display" style="cursor:pointer;" onclick="showPhoneModal()">' +
+        '<span class="phone-label">☁️ 云同步</span>' +
+        '<span class="phone-value" style="color:#FF8A65;">点击绑定手机号 →</span>' +
+      '</div>' : '');
+
+  // === 错词本入口 ===
+  var wwCount = (state.wrongWords || []).length;
+  var wrongWordsHtml = '<div class="me-wrong-words-entry" onclick="startWrongWordReview()">' +
+    '<div class="mww-icon">📝</div>' +
+    '<div class="mww-info"><div class="mww-title">错词本</div>' +
+    '<div class="mww-count">' + (wwCount > 0 ? wwCount + ' 个待复习' : '暂无错词 ✨') + '</div></div>' +
+    '<div class="mww-arrow">' + (wwCount > 0 ? '→' : '') + '</div></div>';
+
+  // === 本周学习概览 ===
+  var _now = new Date();
+  var _weekStart = new Date(_now);
+  _weekStart.setDate(_now.getDate() - _now.getDay());
+  var _weekStartStr = _weekStart.toISOString().slice(0, 10);
+  var _weekHistory = (state.history || []).filter(function(h) { return h.date >= _weekStartStr; });
+  var _weekDays = new Set(_weekHistory.map(function(h) { return h.date; })).size;
+  var _weekNew = 0, _weekReview = 0;
+  _weekHistory.forEach(function(h) { _weekNew += h.newWords.length; _weekReview += h.reviewWords.length; });
+  var weeklyHtml = '<div class="me-weekly-overview">' +
+    '<div class="me-weekly-title">📅 本周学习概览</div>' +
+    '<div class="me-weekly-stats">' +
+      '<div class="me-weekly-item"><div class="mwi-num">' + _weekDays + '</div><div class="mwi-label">学习天数</div></div>' +
+      '<div class="me-weekly-item"><div class="mwi-num">' + _weekNew + '</div><div class="mwi-label">新学单词</div></div>' +
+      '<div class="me-weekly-item"><div class="mwi-num">' + _weekReview + '</div><div class="mwi-label">复习单词</div></div>' +
+    '</div></div>';
+
+  // === 薄弱单词TOP5 ===
+  var _wrongMap = {};
+  (state.wrongWords || []).forEach(function(ww) {
+    var k = ww.word;
+    if (!_wrongMap[k]) _wrongMap[k] = { word: ww.word, meaning: ww.meaning, count: 0 };
+    _wrongMap[k].count++;
+  });
+  var _top5 = Object.values(_wrongMap).sort(function(a, b) { return b.count - a.count; }).slice(0, 5);
+  var weakHtml = _top5.length > 0 ? '<div class="me-weak-words">' +
+    '<div class="me-weak-title">🎯 薄弱单词 TOP5</div>' +
+    _top5.map(function(w, i) {
+      return '<div class="me-weak-item"><span class="mwi-rank">' + (i+1) + '</span>' +
+        '<span class="mwi-word">' + w.word + '</span>' +
+        '<span class="mwi-meaning">' + w.meaning + '</span>' +
+        '<span class="mwi-count">错' + w.count + '次</span></div>';
+    }).join('') + '</div>' : '';
 
   me.innerHTML =
     '<div class="me-stats">' +
@@ -8233,6 +8761,8 @@ function renderMe() {
       '<div class="me-stat" data-icon="🔥"><div class="me-stat-num">' + state.streak + '</div><div class="me-stat-label">连续打卡</div></div>' +
       '<div class="me-stat" data-icon="🐚"><div class="me-stat-num">' + mastered + '/' + total + '</div><div class="me-stat-label">已掌握</div></div>' +
     '</div>' +
+
+    phoneHtml +
 
     '<div class="me-depth-card">' +
       '<div class="me-depth-title">🌊 6大海域总下潜深度</div>' +
@@ -8250,6 +8780,10 @@ function renderMe() {
         '<div class="me-encyclopedia-item"><div class="me-encyclopedia-num">' + (total - learning) + '</div><div class="me-encyclopedia-label">❓ 未发现</div></div>' +
       '</div>' +
     '</div>' +
+
+    wrongWordsHtml +
+    weeklyHtml +
+    weakHtml +
 
     '<div class="me-setting"><div class="me-setting-title">🎯 每日目标</div>' +
       '<div class="me-setting-row"><span class="me-setting-label">每天学习单词数</span>' +
@@ -8431,6 +8965,7 @@ function resetData() {
     state.totalDays = 0;
     state.unlockedBooks = ['g3u'];
     state.currentBookId = 'g3u';
+    state.wrongWords = [];
     currentBookId = 'g3u';
     saveState();
     BOOK_ORDER.forEach(bid => localStorage.removeItem(zoneStorageKey(bid)));
@@ -8476,34 +9011,24 @@ function init() {
       localStorage.setItem(zoneStorageKey(bid), String(idx));
     }
   });
-  renderBookPills();
-  updateLearnWelcome();
-  renderUnitGrid();
-  renderGoalStrip();
-  renderLibrary();
-  renderMe();
-  updateHeader();
+  
   const sndBtn = document.getElementById('soundToggle');
   if (sndBtn) sndBtn.textContent = soundOn() ? '🔊' : '🔇';
   const mapHint = document.getElementById('mapBtnHint');
   if (mapHint) mapHint.textContent = getBookDepth(currentBookId) + '米';
 
-  if (!localStorage.getItem('deepsea_welcomed')) {
-    showOnboarding();
-    return;
+  // 初始化云同步
+  const cloudReady = initSupabase();
+  
+  // 检查是否已有手机号
+  if (cloudReady && !userPhone) {
+    // 没有手机号，显示登录弹窗
+    showPhoneModal();
+    return; // 等登录成功后再调用 afterLogin
   }
-
-  // 欢迎完成后直接进入地图（地图变主入口）
-  // 隐藏单元网格，显示全屏地图
-  openMapOverlay();
-
-  // 全局到期复习提醒（延迟到地图关闭后）
-  const reviewWords = getReviewWords();
-  if (reviewWords.length > 0) {
-    setTimeout(() => {
-      showCharBubble('shelly', '有 ' + reviewWords.length + ' 个单词该复习啦，去学习页面看看吧～', 4000);
-    }, 2000);
-  }
+  
+  // 已有手机号或未配置云同步，直接进入
+  afterLogin();
 }
 
 // ===== WELCOME ONBOARDING =====
@@ -8646,7 +9171,7 @@ function renderMapBooksLevel() {
         '<div class="mb-emoji">' + (unlocked ? b.expeditionEmoji : '🔒') + '</div>' +
         '<div class="mb-info">' +
           '<div class="mb-name">' + b.shortName + ' · ' + b.expeditionName + '</div>' +
-          '<div class="mb-depth">' + b.grade + ' · ' + (unlocked ? (m + '/' + b.totalWords + '词 · ' + (m*METERS_PER_WORD) + '/' + (b.totalWords*METERS_PER_WORD) + '米') : '完成上一册60%后解锁') + '</div>' +
+          '<div class="mb-depth">' + b.grade + ' · ' + (unlocked ? (m + '/' + b.totalWords + '词 · ' + (m*METERS_PER_WORD) + '/' + (b.totalWords*METERS_PER_WORD) + '米') : '完成上一册40%后解锁') + '</div>' +
           '<div class="mb-progress-bar"><div class="mb-progress-fill" style="width:' + (unlocked ? pct : 0) + '%;"></div></div>' +
         '</div>' + statusHtml +
       '</div>';
@@ -8688,7 +9213,7 @@ function onMapLockedBookClick(bookId) {
   const idx = BOOK_ORDER.indexOf(bookId);
   const prev = getBook(BOOK_ORDER[idx - 1]);
   const need = Math.ceil(prev.totalWords * 0.6);
-  showCharBubble('octo', '🔒 ' + getBook(bookId).expeditionName + ' 还未解锁：先在《' + prev.grade + '》掌握 ' + need + ' 个单词（60%）吧！', 4000);
+  showCharBubble('octo', '🔒 ' + getBook(bookId).expeditionName + ' 还未解锁：先在《' + prev.grade + '》掌握 ' + need + ' 个单词（40%）吧！', 4000);
 }
 
 // ---- 第二级：册内6个子海域节点（复用原有节点样式与定位） ----
