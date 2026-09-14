@@ -1718,8 +1718,65 @@ input{font:inherit;color:inherit;}
   text-anchor:middle;dominant-baseline:central;
 }
 
-/* 角色气泡需浮在地图overlay（z300）之上 */
-.char-bubble{z-index:400;}
+/* 角色气泡需浮在地图overlay（z300）之上 - 小气泡样式覆盖 */
+.char-bubble{
+  position:fixed!important;
+  bottom:80px!important;
+  left:12px!important;
+  right:auto!important;
+  max-width:260px!important;
+  width:auto!important;
+  transform:none!important;
+  background:rgba(10,22,40,0.92)!important;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-radius:16px 16px 16px 4px!important;
+  padding:10px 14px!important;
+  display:flex;align-items:flex-start;gap:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+  border:1px solid rgba(79,195,247,0.2)!important;
+  z-index:400;
+  opacity:0;
+  transition:opacity 0.3s,transform 0.3s!important;
+  pointer-events:none;
+}
+.char-bubble.show{
+  opacity:1!important;
+  transform:none!important;
+  pointer-events:auto;
+}
+.char-avatar{width:32px!important;height:32px!important;border-radius:50%!important;flex-shrink:0;}
+.char-bubble-text{flex:1;min-width:0;}
+.char-bubble .char-name{font-size:11px;font-weight:700;color:#FFD93D;margin-bottom:2px;background:none!important;border:none!important;padding:0!important;display:block!important;}
+.char-bubble .char-text{font-size:13px;line-height:1.5;color:rgba(255,255,255,0.9);word-break:break-word;}
+
+/* ===== 欢迎界面 ===== */
+.welcome-splash{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(180deg,#0a1628 0%,#0d2847 30%,#1a4a7a 60%,#2d6b9e 100%);
+  display:flex;align-items:center;justify-content:center;
+  opacity:1;transition:opacity 0.6s ease;
+}
+.welcome-splash.hidden{opacity:0;pointer-events:none;}
+.welcome-content{text-align:center;color:#fff;padding:20px;max-width:360px;}
+.welcome-logo{font-size:56px;margin-bottom:12px;animation:sub-float 2.5s ease-in-out infinite;}
+.welcome-title{font-size:32px;font-weight:800;background:linear-gradient(135deg,#FFD93D,#FF6B6B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0 0 6px;}
+.welcome-subtitle{font-size:18px;color:#4FC3F7;font-weight:600;margin:0 0 18px;}
+.welcome-desc{font-size:14px;line-height:1.8;color:rgba(255,255,255,0.85);margin:0 0 20px;}
+.welcome-characters{font-size:36px;display:flex;justify-content:center;gap:16px;margin-bottom:28px;}
+.welcome-characters span{animation:sub-float 2s ease-in-out infinite;}
+.welcome-characters span:nth-child(2){animation-delay:0.3s;}
+.welcome-characters span:nth-child(3){animation-delay:0.6s;}
+.welcome-characters span:nth-child(4){animation-delay:0.9s;}
+.welcome-btn{
+  background:linear-gradient(135deg,#FFD93D,#FF8C00);
+  border:none;border-radius:28px;padding:14px 42px;
+  font-size:18px;font-weight:700;color:#1a1a2e;
+  cursor:pointer;box-shadow:0 4px 20px rgba(255,217,61,0.4);
+  transition:transform 0.2s;
+}
+.welcome-btn:active{transform:scale(0.96);}
+.welcome-nomore{display:block;margin-top:14px;font-size:12px;color:rgba(255,255,255,0.5);cursor:pointer;}
+.welcome-nomore input{margin-right:4px;}
 
 /* ===== 修复：tab页内容被 ::after 深色遮罩盖住 =====
    旧规则 .tab-page>*{z-index:1} 只作用于直接子元素；内容容器(.lib-section/.me-section)
@@ -2027,10 +2084,34 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
 <!-- Stars Container -->
 <div class="stars-container" id="starsContainer"></div>
 
+<!-- Welcome Splash Screen -->
+<div class="welcome-splash" id="welcomeSplash" style="display:none">
+  <div class="welcome-content">
+    <div class="welcome-logo">🍟🍔</div>
+    <h1 class="welcome-title">美味特工队</h1>
+    <h2 class="welcome-subtitle">深海学院 · 单词探险</h2>
+    <p class="welcome-desc">欢迎来到深海学院！<br>和美味特工队的小伙伴们一起，<br>驾驶亚米号潜艇，开启英语学习探险之旅吧！</p>
+    <div class="welcome-characters">
+      <span>🍔</span><span>🍟</span><span>🐢</span><span>🐙</span>
+    </div>
+    <button class="welcome-btn" onclick="dismissWelcome()">开始探险 →</button>
+    <label class="welcome-nomore"><input type="checkbox" id="welcomeNoMore"> 下次不再显示</label>
+  </div>
+</div>
+
+<!-- Generic Modal -->
+<div class="modal-overlay" id="genericModal">
+  <div class="modal">
+    <h3 id="genericModalTitle"></h3>
+    <p id="genericModalMsg" style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6;"></p>
+    <div id="genericModalBtns" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</div>
+
 <!-- Character Bubble -->
 <div class="char-bubble" id="charBubble">
   <div class="char-avatar" id="charAvatar"></div>
-  <div>
+  <div class="char-bubble-text" id="charBubbleTextWrap">
     <div class="char-name" id="charName"></div>
     <div class="char-text" id="charText"></div>
   </div>
@@ -2072,9 +2153,9 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
       </button>
       <div class="daily-goal-strip" id="dailyGoalStrip">
         <span class="dgs-icon">🎯</span>
-        <span class="dgs-text">今日新词目标</span>
+        <span class="dgs-text">单元进度</span>
         <span class="dgs-bar"><span class="dgs-fill" style="width:0%"></span></span>
-        <span class="dgs-pill">0/3</span>
+        <span class="dgs-pill">0%</span>
       </div>
       <div class="unit-grid" id="unitGrid"></div>
     </div>
@@ -6996,6 +7077,27 @@ function showSyncStatus(status) {
   }
 }
 
+function showModal(title, msg, buttons, isDanger) {
+  var modal = document.getElementById('genericModal');
+  if (!modal) return;
+  document.getElementById('genericModalTitle').textContent = title;
+  document.getElementById('genericModalMsg').textContent = msg;
+  var btnsEl = document.getElementById('genericModalBtns');
+  btnsEl.innerHTML = '';
+  (buttons || []).forEach(function(b) {
+    var btn = document.createElement('button');
+    btn.className = 'modal-btn ' + (b.cls === 'primary' ? 'modal-btn-primary' : b.cls === 'danger' ? 'modal-btn-danger' : 'modal-btn-secondary');
+    btn.textContent = b.text;
+    btn.onclick = b.action;
+    btnsEl.appendChild(btn);
+  });
+  modal.classList.add('show');
+}
+function closeModal() {
+  var modal = document.getElementById('genericModal');
+  if (modal) modal.classList.remove('show');
+}
+
 function showPhoneModal() {
   const modal = document.getElementById('phoneModal');
   if (modal) modal.style.display = 'flex';
@@ -7045,7 +7147,28 @@ async function handlePhoneLogin() {
   afterLogin();
 }
 
+function dismissWelcome() {
+  var cb = document.getElementById('welcomeNoMore');
+  if (cb && cb.checked) {
+    state._welcomeDismissed = true;
+    saveState();
+  }
+  var splash = document.getElementById('welcomeSplash');
+  if (splash) splash.classList.add('hidden');
+  setTimeout(function() {
+    if (splash) splash.style.display = 'none';
+  }, 600);
+}
+
 function afterLogin() {
+  // 欢迎界面：首次或未标记跳过时显示
+  var splash = document.getElementById('welcomeSplash');
+  if (splash && !state._welcomeDismissed && localStorage.getItem('deepsea_welcomed')) {
+    splash.style.display = '';
+    splash.classList.remove('hidden');
+  } else if (splash) {
+    splash.style.display = 'none';
+  }
   renderBookPills();
   updateLearnWelcome();
   renderUnitGrid();
@@ -7150,13 +7273,13 @@ function getUnitProgress(bookId, unitId) {
   return Math.round((m / unit.words.length) * 100);
 }
 
-// 册内单元解锁：前一单元 mastered ≥ 60%
+// 册内单元解锁：前一单元 mastered >= 50%
 function isUnitUnlocked(bookId, unitId) {
   if (unitId <= 1) return true;
   const prevUnit = getUnit(bookId, unitId - 1);
   if (!prevUnit) return true;
   const prevMastered = getUnitMasteredCount(bookId, unitId - 1);
-  return prevMastered >= Math.ceil(prevUnit.words.length * 0.3);
+  return prevMastered >= Math.ceil(prevUnit.words.length * 0.5);
 }
 
 // ===== 册（大海域）解锁：前一册 mastered ≥ 该册总词数 60% =====
@@ -7168,7 +7291,7 @@ function checkBookUnlocks(celebrate) {
     const prevId = BOOK_ORDER[i-1], curId = BOOK_ORDER[i];
     if (!isBookUnlocked(curId)) {
       const prevBook = getBook(prevId);
-      if (getBookLearning(prevId) >= Math.ceil(prevBook.totalWords * 0.4)) {
+      if (getBookLearning(prevId) >= Math.ceil(prevBook.totalWords * 0.3)) {
         state.unlockedBooks.push(curId);
         newly.push(curId);
       }
@@ -7422,7 +7545,7 @@ function sm2Review(w, quality) {
     ws.reps++;
     ws.interval = ws.interval === 0 ? 1 : Math.round(ws.interval * 1.5);
     ws.correctCount++;
-    ws.status = ws.reps >= 5 ? 'mastered' : 'learning';
+    ws.status = 'mastered'; // 即时掌握：答对即掌握
   } else if (quality >= 3) {
     ws.interval = Math.max(1, Math.round(ws.interval * 1.0));
     ws.status = 'learning';
@@ -7788,6 +7911,28 @@ function renderUnitGrid() {
 // ===== SESSION ENGINE =====
 let session = null;
 
+function _doStartSession(bookId, unitId, unit, newWords, reviewCandidates) {
+  const reviewWords = reviewCandidates.slice(0, 8);
+  if (newWords.length === 0 && reviewWords.length === 0) {
+    showCharBubble('shelly', '没有需要学习或复习的单词哦～');
+    return;
+  }
+  session = {
+    bookId, unitId, unitName: unit.unit_name,
+    newWords: newWords.map(w => ({...w})),
+    reviewWords: reviewWords.map(w => ({...w})),
+    phase: 'intro', newIdx: 0, quizIdx: 0, reviewIdx: 0,
+    results: { newCorrect: 0, newTotal: 0, reviewResults: [] },
+    _startDepth: getBookDepth(bookId),
+    _unlockedAtStart: state.unlockedBooks.slice()
+  };
+  document.getElementById('sessionOverlay').classList.add('active');
+  SFX.pop();
+  showCharEntrance('burger');
+  setTimeout(() => showCharBubble('burger', pickRandom(CHARACTERS.burger.intros)), 1200);
+  setTimeout(() => showPhase(), 1500);
+}
+
 function startSession(bookId, unitId, reviewOnly) {
   const unit = getUnit(bookId, unitId);
   if (!unit) return;
@@ -7817,11 +7962,8 @@ function startSession(bookId, unitId, reviewOnly) {
     reviewCandidates = reviewPool.concat(globalDue);
   }
 
-  // 每日目标联动：今日新词配额 = 目标 - 今日已学（每次探险最多4个新词）
-  const goalNum = state.settings.dailyGoal === 99 ? 9999 : state.settings.dailyGoal;
-  const remaining = goalNum - getTodayNewCount();
-  const newCap = reviewOnly ? 0 : (remaining >= 4 ? 4 : Math.max(0, remaining));
-  const newWords = unlearned.slice(0, newCap);
+  // 不限量模式：一次学完整个单元所有未学单词
+  const newWords = reviewOnly ? [] : unlearned;
   if (newWords.length === 0 && !reviewOnly) {
     if (unlearned.length === 0) {
       // 本单元学完：直接进复习模式（本单元学过的词）
@@ -7832,64 +7974,10 @@ function startSession(bookId, unitId, reviewOnly) {
         showCharBubble('shelly', '这个子海域的单词你都学过了，去挑战下一片海域吧！');
       }
     } else {
-      // 今日配额用完但还有新词：弹选择窗口，不强制拦
-      showModal('🎯 今日目标已达成',
-        '你今天已经完成了新词目标，还要继续学新词吗？',
-        [
-          { text: '📚 继续学新词', cls: 'primary', action: function(){
-              // 超额模式：直接发最多4个新词，不再查配额
-              const extraWords = unlearned.slice(0, 4);
-              const reviewWords = reviewCandidates.slice(0, 8);
-              if (extraWords.length === 0 && reviewWords.length === 0) {
-                showCharBubble('shelly', '没有需要学习或复习的单词哦～');
-                closeModal();
-                return;
-              }
-              session = { bookId, unitId, unitName: unit.unit_name,
-                newWords: extraWords.map(w => ({...w})),
-                reviewWords: reviewWords.map(w => ({...w})),
-                phase: 'intro', newIdx:0, quizIdx:0, reviewIdx:0,
-                results: { newCorrect:0, newTotal:0, reviewResults:[] },
-                _startDepth: getBookDepth(bookId),
-                _unlockedAtStart: state.unlockedBooks.slice() };
-              document.getElementById('sessionOverlay').classList.add('active');
-              closeModal();
-              SFX.pop();
-              showCharEntrance('burger');
-              setTimeout(() => showCharBubble('burger', '超额挑战！继续探索新单词吧～', 2500), 1200);
-              setTimeout(() => showPhase(), 1800);
-            }
-          },
-          { text: '🔄 今天先复习', action: function(){ closeModal(); startSession(bookId, unitId, true); } }
-        ], true);
       return;
     }
   }
-  const reviewWords = reviewCandidates.slice(0, 8);
-
-  if (newWords.length === 0 && reviewWords.length === 0) {
-    showCharBubble('shelly', '没有需要学习或复习的单词哦～');
-    return;
-  }
-
-  session = {
-    bookId,
-    unitId,
-    unitName: unit.unit_name,
-    newWords: newWords.map(w => ({ ...w })),
-    reviewWords: reviewWords.map(w => ({ ...w })),
-    phase: 'intro',
-    newIdx: 0, quizIdx: 0, reviewIdx: 0,
-    results: { newCorrect: 0, newTotal: 0, reviewResults: [] },
-    _startDepth: getBookDepth(bookId),
-    _unlockedAtStart: state.unlockedBooks.slice()
-  };
-
-  document.getElementById('sessionOverlay').classList.add('active');
-  SFX.pop();
-  showCharEntrance('burger');
-  setTimeout(() => showCharBubble('burger', pickRandom(CHARACTERS.burger.intros)), 1200);
-  setTimeout(() => showPhase(), 1500);
+  _doStartSession(bookId, unitId, unit, newWords, reviewCandidates);
 }
 
 
@@ -7954,52 +8042,42 @@ function getTodayNewCount() {
 
 // 当日目标达成庆祝（每天只弹一次）
 function checkDailyGoal() {
-  const goal = state.settings.dailyGoal;
-  if (goal === 99) return;
-  if (state._goalCelebratedDate === getToday()) return;
-  if (getTodayNewCount() >= goal) {
-    state._goalCelebratedDate = getToday();
-    saveState();
-    SFX.goal();
-    for (let i = 0; i < 14; i++) {
-      setTimeout(() => showStars(
-        window.innerWidth/2 + (Math.random()-0.5)*240,
-        window.innerHeight/2 + (Math.random()-0.5)*140
-      ), i*110);
-    }
-    const celeb = document.createElement('div');
-    celeb.className = 'zone-celebration goal-celebration';
-    celeb.innerHTML =
-      '<div class="zone-emoji">🎯</div>' +
-      '<div class="zone-title" style="color:#FFD93D;">今日目标达成！</div>' +
-      '<div class="zone-depth" style="color:#16DB93;">今天学会了 ' + goal + ' 个新单词</div>' +
-      '<div class="zone-char-msg book-msg">太棒了！薯条厨娘为你骄傲～明天继续深海探险吧！🌟</div>';
-    document.body.appendChild(celeb);
-    setTimeout(() => celeb.classList.add('show'), 50);
-    setTimeout(() => { celeb.classList.remove('show'); setTimeout(() => celeb.remove(), 500); }, 3600);
-  }
+  // 简化：不再做每日限制庆祝，改由单元完成庆祝代替
+  // 保留函数签名避免调用报错
 }
 
 function renderGoalStrip() {
   const el = document.getElementById('dailyGoalStrip');
   if (!el) return;
-  const goal = state.settings.dailyGoal;
-  const done = getTodayNewCount();
-  if (goal === 99) {
-    el.innerHTML = '<span class="dgs-icon">🎯</span><span class="dgs-text">今日目标：不限新词</span>' +
-      '<span class="dgs-bar"><span class="dgs-fill" style="width:100%"></span></span>' +
-      '<span class="dgs-pill done">已学 ' + done + ' 词</span>';
-    el.classList.add('done');
-    return;
+  // 显示当前单元进度
+  const bookId = currentBookId;
+  const units = currentBook().units || [];
+  let bestProgress = 0, label = '选择单元开始探险';
+  units.forEach(u => {
+    const p = getUnitProgress(bookId, u.unit_id);
+    if (p > bestProgress) bestProgress = p;
+  });
+  // 找到当前正在学习的单元
+  let currentUnit = null;
+  for (let i = 0; i < units.length; i++) {
+    const p = getUnitProgress(bookId, units[i].unit_id);
+    if (p < 100 && isUnitUnlocked(bookId, units[i].unit_id)) { currentUnit = units[i]; break; }
   }
-  const reached = done >= goal;
-  const pct = Math.min(100, Math.round((done / goal) * 100));
+  if (currentUnit) {
+    const p = getUnitProgress(bookId, currentUnit.unit_id);
+    label = currentUnit.unit_name + ' (' + p + '%)';
+    bestProgress = p;
+  } else if (units.length > 0) {
+    bestProgress = 100;
+    label = '全部单元已完成 🎉';
+  }
+  const reached = bestProgress >= 100;
   el.classList.toggle('done', reached);
   el.innerHTML =
-    '<span class="dgs-icon">' + (reached ? '🏆' : '🎯') + '</span>' +
-    '<span class="dgs-text">今日新词目标</span>' +
-    '<span class="dgs-bar"><span class="dgs-fill" style="width:' + pct + '%"></span></span>' +
-    '<span class="dgs-pill ' + (reached ? 'done' : '') + '">' + (reached ? '已达成 🎉' : done + '/' + goal) + '</span>';
+    '<span class="dgs-icon">' + (reached ? '🏆' : '📖') + '</span>' +
+    '<span class="dgs-text">' + label + '</span>' +
+    '<span class="dgs-bar"><span class="dgs-fill" style="width:' + bestProgress + '%"></span></span>' +
+    '<span class="dgs-pill ' + (reached ? 'done' : '') + '">' + (reached ? '已完成' : bestProgress + '%') + '</span>';
 }
 
 function closeSession() {
@@ -8556,6 +8634,30 @@ function showSummary() {
 
   showCharEntrance('fries');
   // report 已有 encourageMsg，不再弹 charBubble（避免与底部按钮重叠）
+
+  // 检查单元完成：当前单元所有词都已掌握
+  var unitProgress = getUnitProgress(session.bookId, session.unitId);
+  if (unitProgress >= 100) {
+    setTimeout(function() {
+      var celeb = document.createElement('div');
+      celeb.className = 'zone-celebration';
+      var z = getZones(session.bookId);
+      var zone = z[session.unitId - 1];
+      celeb.style.setProperty('--zone-color', zone ? zone.color : '#4FC3F7');
+      celeb.innerHTML = '<div class="zone-emoji">🏆</div>' +
+        '<div class="zone-title">单元完成！</div>' +
+        '<div class="zone-depth">' + session.unitName + ' · 全部掌握</div>' +
+        '<div class="zone-char-msg book-msg">太厉害了！这个子海域的单词全部掌握了，快前往新的子海域吧！</div>';
+      document.body.appendChild(celeb);
+      for (var i = 0; i < 18; i++) {
+        setTimeout(function() { showStars(window.innerWidth/2 + (Math.random()-0.5)*220, window.innerHeight/2 + (Math.random()-0.5)*120); }, i*90);
+      }
+      setTimeout(function() { celeb.classList.add('show'); }, 50);
+      setTimeout(function() { celeb.classList.remove('show'); setTimeout(function() { celeb.remove(); }, 500); }, 4000);
+    }, 800);
+  }
+  // 检查册解锁
+  checkBookUnlocks(false);
 }
 
 function continueLearning() {
@@ -8785,12 +8887,12 @@ function renderMe() {
     weeklyHtml +
     weakHtml +
 
-    '<div class="me-setting"><div class="me-setting-title">🎯 每日目标</div>' +
-      '<div class="me-setting-row"><span class="me-setting-label">每天学习单词数</span>' +
+    '<div class="me-setting"><div class="me-setting-title">🎯 每次学习量</div>' +
+      '<div class="me-setting-row"><span class="me-setting-label">每次探险学习模式</span>' +
       '<div class="me-goal-btns">' +
-        '<button class="me-goal-btn ' + (state.settings.dailyGoal===3?'active':'') + '" onclick="setGoal(3)">3词</button>' +
+        '<button class="me-goal-btn ' + (state.settings.dailyGoal===99?'active':'') + '" onclick="setGoal(99)">全部学习</button>' +
         '<button class="me-goal-btn ' + (state.settings.dailyGoal===5?'active':'') + '" onclick="setGoal(5)">5词</button>' +
-        '<button class="me-goal-btn ' + (state.settings.dailyGoal===99?'active':'') + '" onclick="setGoal(99)">全部复习</button>' +
+        '<button class="me-goal-btn ' + (state.settings.dailyGoal===3?'active':'') + '" onclick="setGoal(3)">3词</button>' +
       '</div></div></div>' +
 
     '<div class="me-setting"><div class="me-setting-title">📊 学习记录</div>' + renderRecentHistory() + '</div>' +
