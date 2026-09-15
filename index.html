@@ -1587,6 +1587,10 @@ input{font:inherit;color:inherit;}
 /* ===== 6册统一架构：新增样式（V2） ========== */
 /* ============================================ */
 
+/* ===== 修复：覆盖旧CSS中 .tab-page{position:relative;} 的冲突 ===== */
+/* 旧版单册CSS设置了 position:relative，导致tab滑动机制失效（词库/我的页面空白） */
+.tab-page{position:absolute!important;inset:0!important;}
+
 /* ===== 册别选择 PILLS ===== */
 .book-pills{
   display:flex;gap:8px;overflow-x:auto;padding:12px 2px 6px;
@@ -8967,7 +8971,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== ME TAB（总进度 + 6册海域进度） =====
 function renderMe() {
+  try {
   const me = document.getElementById('meContent');
+  if (!me) { console.warn('renderMe: DOM element meContent not found'); return; }
   const mastered = getTotalMastered();
   const learning = getTotalLearning();
   const total = ALL_BOOK_WORDS.length;
@@ -9092,6 +9098,7 @@ function renderMe() {
   entry.addEventListener('mouseup', () => clearTimeout(pressTimer));
   entry.addEventListener('mouseleave', () => clearTimeout(pressTimer));
   entry.addEventListener('touchend', () => clearTimeout(pressTimer));
+  } catch(e) { console.warn('renderMe error:', e); }
 }
 
 function renderRecentHistory() {
