@@ -1718,36 +1718,36 @@ input{font:inherit;color:inherit;}
   text-anchor:middle;dominant-baseline:central;
 }
 
-/* 角色气泡需浮在地图overlay（z300）之上 - 小气泡样式覆盖 */
+/* 角色气泡 — 固定在顶部中央（进度条下方），不遮挡答题区域 */
 .char-bubble{
   position:fixed!important;
-  bottom:80px!important;
-  left:12px!important;
+  top:60px!important;
+  bottom:auto!important;
+  left:50%!important;
   right:auto!important;
-  max-width:260px!important;
+  transform:translateX(-50%)!important;
+  max-width:85%!important;
   width:auto!important;
-  transform:none!important;
   background:rgba(10,22,40,0.92)!important;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  border-radius:16px 16px 16px 4px!important;
-  padding:10px 14px!important;
+  border-radius:12px!important;
+  padding:8px 12px!important;
   display:flex;align-items:flex-start;gap:8px;
   box-shadow:0 4px 16px rgba(0,0,0,0.3);
   border:1px solid rgba(79,195,247,0.2)!important;
   z-index:400;
   opacity:0;
-  transition:opacity 0.3s,transform 0.3s!important;
+  transition:opacity 0.3s!important;
   pointer-events:none;
 }
 .char-bubble.show{
   opacity:1!important;
-  transform:none!important;
   pointer-events:auto;
 }
-.char-avatar{width:32px!important;height:32px!important;border-radius:50%!important;flex-shrink:0;}
+.char-avatar{width:28px!important;height:28px!important;border-radius:50%!important;flex-shrink:0;}
 .char-bubble-text{flex:1;min-width:0;}
-.char-bubble .char-name{font-size:11px;font-weight:700;color:#FFD93D;margin-bottom:2px;background:none!important;border:none!important;padding:0!important;display:block!important;}
-.char-bubble .char-text{font-size:13px;line-height:1.5;color:rgba(255,255,255,0.9);word-break:break-word;}
+.char-bubble .char-name{font-size:11px;font-weight:700;color:#FFD93D;margin-bottom:1px;background:none!important;border:none!important;padding:0!important;display:block!important;}
+.char-bubble .char-text{font-size:13px;line-height:1.4;color:rgba(255,255,255,0.9);word-break:break-word;}
 
 /* ===== 欢迎界面 ===== */
 .welcome-splash{
@@ -2070,10 +2070,35 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
   100%{background:transparent;}
 }
 
+/* 返回按钮 */
+.btn-back {
+  display: block;
+  margin: 0 auto;
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(79, 195, 247, 0.4);
+  background: rgba(255,255,255,0.15);
+  color: #4FC3F7;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-back:active {
+  transform: scale(0.95);
+  background: rgba(79, 195, 247, 0.15);
+}
+
 </style>
 
 </head>
 <body>
+
+<!-- Loading Indicator -->
+<div id="loadingOverlay" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(180deg,#0a1628,#1a3a5e);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font-family:sans-serif;transition:opacity .4s">
+  <div style="font-size:48px;animation:sub-float 2s ease-in-out infinite">🍟🍔</div>
+  <div style="margin-top:16px;font-size:15px;color:rgba(255,255,255,.7)">深海学院准备中...</div>
+</div>
 
 <!-- Bubble Background -->
 <div class="bubbles" id="bubbles"></div>
@@ -5070,7 +5095,7 @@ const BOOK_DATA = [
     "grade": "五年级上册",
     "shortName": "五上",
     "textbook": "PEP人教版（2024新版）",
-    "total_words": 116,
+    "total_words": 119,
     "units": [
       {
         "unit_id": 1,
@@ -5302,7 +5327,7 @@ const BOOK_DATA = [
         "unit_id": 3,
         "unit_name": "Work and play",
         "theme": "学习与活动",
-        "word_count": 19,
+        "word_count": 20,
         "words": [
           {
             "word": "Wednesday",
@@ -5326,6 +5351,12 @@ const BOOK_DATA = [
             "word": "Friday",
             "phonetic": "/ˈfraɪdeɪ/",
             "meaning": "星期五",
+            "pos": "n"
+          },
+          {
+            "word": "Monday",
+            "phonetic": "/ˈmʌndeɪ/",
+            "meaning": "星期一",
             "pos": "n"
           },
           {
@@ -5680,7 +5711,7 @@ const BOOK_DATA = [
         "unit_id": 6,
         "unit_name": "Nature and us",
         "theme": "自然与我们",
-        "word_count": 22,
+        "word_count": 24,
         "words": [
           {
             "word": "river",
@@ -5777,6 +5808,18 @@ const BOOK_DATA = [
             "phonetic": "/faɪn/",
             "meaning": "晴朗的",
             "pos": "adj"
+          },
+          {
+            "word": "snow",
+            "phonetic": "/snəʊ/",
+            "meaning": "雪",
+            "pos": "n"
+          },
+          {
+            "word": "snowman",
+            "phonetic": "/ˈsnəʊmæn/",
+            "meaning": "雪人",
+            "pos": "n"
           },
           {
             "word": "fog",
@@ -7145,6 +7188,9 @@ async function handlePhoneLogin() {
   
   // 继续初始化流程
   afterLogin();
+  // 隐藏加载提示
+  var lo = document.getElementById('loadingOverlay');
+  if (lo) { lo.style.opacity = '0'; setTimeout(function(){ lo.style.display = 'none'; }, 400); }
 }
 
 function dismissWelcome() {
@@ -7572,6 +7618,7 @@ function getReviewWords(bookId) {
 // ===== SPEECH =====
 let speechSynth = window.speechSynthesis;
 let enVoice = null, zhVoice = null;
+let _speakSeq = 0;  // 序列号，防止竞态导致过期语音播放
 
 function initSpeech() {
   if (!speechSynth) return;
@@ -7594,16 +7641,22 @@ function initSpeech() {
 function speakWord(text, lang) {
   lang = lang || 'en';
   if (!speechSynth) return;
+  const seq = ++_speakSeq;  // 递增序列号
   speechSynth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  if (lang === 'en') {
-    u.lang = 'en-US'; u.rate = 0.8; u.pitch = 1.1;
-    if (enVoice) u.voice = enVoice;
-  } else {
-    u.lang = 'zh-CN'; u.rate = 0.9; u.pitch = 1.0;
-    if (zhVoice) u.voice = zhVoice;
-  }
-  speechSynth.speak(u);
+  // 短暂延迟后再次 cancel，确保队列清空（某些移动端 cancel 有延迟）
+  setTimeout(function() {
+    if (_speakSeq !== seq) return;  // 已被更新的调用取代，放弃
+    speechSynth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (lang === 'en') {
+      u.lang = 'en-US'; u.rate = 0.8; u.pitch = 1.1;
+      if (enVoice) u.voice = enVoice;
+    } else {
+      u.lang = 'zh-CN'; u.rate = 0.9; u.pitch = 1.0;
+      if (zhVoice) u.voice = zhVoice;
+    }
+    speechSynth.speak(u);
+  }, 30);
 }
 
 // ===== SOUND ENGINE（Web Audio 纯合成，零音频素材） =====
@@ -7782,7 +7835,7 @@ function switchTab(idx) {
 // ===== CHARACTER BUBBLE =====
 let charBubbleTimer = null;
 function showCharBubble(charKey, text, duration) {
-  duration = duration || 3500;
+  duration = duration || 2000;
   const bubble = document.getElementById('charBubble');
   const avatar = document.getElementById('charAvatar');
   const nameEl = document.getElementById('charName');
@@ -8277,7 +8330,9 @@ function showNewWord() {
         (example ? '<div class="flashcard-example">“' + example + '”</div>' : '') +
       '</div>' +
     '</div></div>' +
-    '<div class="flashcard-nav phase-enter"><button class="btn-next" onclick="nextNewWord()">' +
+    '<div class="flashcard-nav phase-enter">' +
+      (session.newIdx > 0 ? '<button class="btn-back" onclick="prevNewWord()">← 上一个</button>' : '') +
+      '<button class="btn-next" onclick="nextNewWord()">' +
       (session.newIdx < session.newWords.length - 1 ? '下一个 →' : '开始练习 →') +
     '</button></div>';
 
@@ -8305,6 +8360,7 @@ function flipCard() {
 }
 
 function nextNewWord() { session.newIdx++; showPhase(); }
+function prevNewWord() { if (session.newIdx > 0) { session.newIdx--; showPhase(); } }
 
 function showQuiz() {
   if (session.quizIdx >= session.newWords.length) {
@@ -8314,13 +8370,17 @@ function showQuiz() {
     return;
   }
   const w = session.newWords[session.quizIdx];
-  session.results.newTotal++;
+  if (!session._answeredQuizIdxs) session._answeredQuizIdxs = {};
+  if (!session._answeredQuizIdxs[session.quizIdx]) {
+    session.results.newTotal++;
+  }
   const quizType = session.quizIdx % 3;
   const body = document.getElementById('sessionBody');
   if (quizType === 0) showListenSelectQuiz(w, body);
   else if (quizType === 1) showCnSelectEnQuiz(w, body);
   else showSpellQuiz(w, body);
 }
+function prevQuizQuestion() { if (session.quizIdx > 0) { session.quizIdx--; showPhase(); } }
 
 // 干扰词优先从当前单元抽取（同主题/同难度），不足再从整册补
 function getDistractors(correctWord, count, field) {
@@ -8338,10 +8398,11 @@ function showListenSelectQuiz(w, body) {
   const options = getDistractors(w, 3, 'word');
   options.push(w.word);
   options.sort(() => Math.random() - 0.5);
-  showCharBubble('burger', '听一听，选出你听到的单词！');
   setTimeout(() => speakWord(w.word), 800);
+  var backBtn = session.quizIdx > 0 ? '<button class="btn-back" onclick="prevQuizQuestion()" style="margin-bottom:8px">← 上一题</button>' : '';
   body.innerHTML =
     '<div class="quiz-area phase-enter">' +
+      backBtn +
       '<button class="speak-btn" onclick="speakWord(\'' + w.word.replace(/'/g,"\\'") + '\')" style="margin:0 auto 16px">🔊</button>' +
       '<div class="quiz-question">听音选词</div><div class="quiz-prompt">点击喇叭再听一次</div>' +
       '<div class="quiz-options" id="quizOptions">' +
@@ -8353,9 +8414,10 @@ function showCnSelectEnQuiz(w, body) {
   const options = getDistractors(w, 3, 'word');
   options.push(w.word);
   options.sort(() => Math.random() - 0.5);
-  showCharBubble('burger', '下面哪个是 "' + w.meaning + '" 的英文？');
+  var backBtn = session.quizIdx > 0 ? '<button class="btn-back" onclick="prevQuizQuestion()" style="margin-bottom:8px">← 上一题</button>' : '';
   body.innerHTML =
     '<div class="quiz-area phase-enter">' +
+      backBtn +
       '<div class="quiz-question" style="font-size:24px;color:var(--bio-green)">' + w.meaning + '</div>' +
       '<div class="quiz-prompt">' + w.phonetic + '</div>' +
       '<div class="quiz-options" id="quizOptions">' +
@@ -8406,9 +8468,10 @@ function showSpellQuiz(w, body) {
   const lettersHtml = pool.map((l, i) =>
     '<button class="spell-letter" data-letter="' + l + '" data-idx="' + i + '" onclick="pickLetter(this)">' + l + '</button>').join('');
 
-  showCharBubble('timmy', mode === 'full' ? '来拼一拼这个单词吧！点选字母～' : '有几个字母藏起来了，点下面的字母把空槽补满吧！');
+  var backBtn = session.quizIdx > 0 ? '<button class="btn-back" onclick="prevQuizQuestion()" style="margin-bottom:8px">← 上一题</button>' : '';
   body.innerHTML =
     '<div class="spell-area phase-enter">' +
+      backBtn +
       wordVisualHtml(w, 'wv-quiz') +
       '<div class="spell-title">' + (mode === 'full' ? '✏️ 拼出这个单词' : '🧩 补全单词') + '</div>' +
       '<button class="speak-btn" onclick="speakWord(\'' + esc + '\')" style="margin:4px auto 10px">🔊 听一听</button>' +
@@ -8472,7 +8535,10 @@ function checkSpell(word) {
     else answer += target[i];
   }
   const correct = answer === target;
-  // 计数已在 showQuiz 统一完成（与听音/选择题一致），此处不再重复计数
+  // 标记这道拼写题已回答，防止重复计分
+  if (!session._answeredQuizIdxs) session._answeredQuizIdxs = {};
+  if (session._answeredQuizIdxs[session.quizIdx]) return;
+  session._answeredQuizIdxs[session.quizIdx] = correct;
   const wObj = session.newWords.find(x => x.word.toLowerCase() === word.toLowerCase());
   if (correct) {
     if (wObj) sm2Review(wObj, 5);
@@ -8494,10 +8560,15 @@ function checkSpell(word) {
 
 function handleQuizAnswer(btn, correctWord) {
   if (!session) return;
+  // 防止重复计分：如果这道题已经回答过，直接忽略
+  if (session._answeredQuizIdxs && session._answeredQuizIdxs[session.quizIdx]) return;
   const answer = btn.dataset.answer;
   const correct = answer === correctWord;
   document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
   const wObj = session.newWords.find(x => x.word === correctWord);
+  // 标记这道题已回答
+  if (!session._answeredQuizIdxs) session._answeredQuizIdxs = {};
+  session._answeredQuizIdxs[session.quizIdx] = correct;
 
   if (correct) {
     btn.classList.add('correct');
@@ -8525,23 +8596,20 @@ function handleQuizAnswer(btn, correctWord) {
 }
 
 function showCorrectFeedback(word) {
-  const char = Math.random() > 0.5 ? 'fries' : 'timmy';
-  showCharBubble(char, pickRandom(CHARACTERS[char].correct));
-  // 绿色闪烁效果
+  // 答对只做视觉反馈（绿色闪烁 + 星星），不再弹气泡
   var body = document.getElementById('sessionBody');
   if (body) { body.classList.add('answer-correct-flash'); setTimeout(function() { body.classList.remove('answer-correct-flash'); }, 600); }
-  setTimeout(() => { session.quizIdx++; showPhase(); }, 1800);
+  setTimeout(() => { session.quizIdx++; showPhase(); }, 1500);
 }
 
 function showWrongFeedback(word) {
-  const char = Math.random() > 0.5 ? 'timmy' : 'burger';
-  // 温和提示，不直接显示"错误"
-  showCharBubble(char, pickRandom(CHARACTERS[char].wrong) + ' 没关系，正确答案是 "' + word + '"，记住它吧～');
+  // 答错时顶部简短提示 + 朗读正确发音
+  showCharBubble('shelly', '正确答案：" ' + word + '"，记住它吧～', 2000);
+  speakWord(word);
   // 柔和红色闪烁
   var body = document.getElementById('sessionBody');
   if (body) { body.classList.add('answer-wrong-flash'); setTimeout(function() { body.classList.remove('answer-wrong-flash'); }, 800); }
-  setTimeout(() => speakWord(word), 600);
-  setTimeout(() => { session.quizIdx++; showPhase(); }, 3000);
+  setTimeout(() => { session.quizIdx++; showPhase(); }, 2500);
 }
 
 function showReview() {
@@ -8550,7 +8618,6 @@ function showReview() {
   }
   const w = session.reviewWords[session.reviewIdx];
   const body = document.getElementById('sessionBody');
-  showCharBubble('shelly', pickRandom(CHARACTERS.shelly.review));
   body.innerHTML =
     '<div class="review-card phase-enter">' +
       wordVisualHtml(w, 'wv-review') +
@@ -9126,11 +9193,17 @@ function init() {
   if (cloudReady && !userPhone) {
     // 没有手机号，显示登录弹窗
     showPhoneModal();
+    // 隐藏加载提示
+    var lo = document.getElementById('loadingOverlay');
+    if (lo) { lo.style.opacity = '0'; setTimeout(function(){ lo.style.display = 'none'; }, 400); }
     return; // 等登录成功后再调用 afterLogin
   }
   
   // 已有手机号或未配置云同步，直接进入
   afterLogin();
+  // 隐藏加载提示
+  var lo = document.getElementById('loadingOverlay');
+  if (lo) { lo.style.opacity = '0'; setTimeout(function(){ lo.style.display = 'none'; }, 400); }
 }
 
 // ===== WELCOME ONBOARDING =====
