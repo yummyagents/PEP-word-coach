@@ -1962,9 +1962,51 @@ input{font:inherit;color:inherit;}
 /* 目标达成庆祝沿用 zone-celebration，微调主色 */
 .goal-celebration{--zone-color:#FFD93D;}
 
-/* ===== 按钮触感优化 ===== */
+/* ===== 修复：闪卡翻面文字镜像问题，用 opacity 切换替代 3D rotateY ===== */
+.flashcard {
+  transform: none !important;
+  transform-style: flat !important;
+  transition: none !important;
+}
+.flashcard.flipped {
+  transform: none !important;
+}
+.flashcard-front {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: opacity 0.3s ease !important;
+}
+.flashcard-back {
+  opacity: 0 !important;
+  transform: none !important;
+  position: absolute !important;
+  inset: 0 !important;
+  transition: opacity 0.3s ease !important;
+  pointer-events: none !important;
+}
+.flashcard.flipped .flashcard-front {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.flashcard.flipped .flashcard-back {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* ===== 修复：tab 页面滚动问题 ===== */
+.tab-page {
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+/* 隐藏时完全不阻挡触摸 */
+#authModal[style*="display: none"],
+.phone-modal[style*="display: none"] {
+  pointer-events: none !important;
+}
+/* 按钮触感优化（移除 flashcard 避免干扰滚动） ===== */
 button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
-.flashcard, .map-back-btn, .session-close, .me-book-row, .lib-word-item {
+.map-back-btn, .session-close, .me-book-row, .lib-word-item {
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   -webkit-user-select:none;user-select:none;
 }
@@ -1977,9 +2019,13 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
 .session-body{padding-bottom:60px!important;}
 .flashcard-nav{margin-bottom:20px;}
 
-/* ===== 云同步：手机号登录弹窗 ===== */
+/* ===== 云同步：登录弹窗（默认隐藏，不阻挡触摸） ===== */
 .phone-modal{
-  position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.phone-modal[style*="display: flex"]{
+  pointer-events:auto;
 }
 .phone-modal-backdrop{
   position:absolute;inset:0;background:rgba(0,10,30,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
@@ -2013,6 +2059,11 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
 .phone-modal-btn:active{transform:scale(0.96);}
 .phone-modal-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 .phone-modal-hint{font-size:11px;color:rgba(179,229,252,0.45);margin-top:14px;}
+
+/* ===== 登录/注册 Tab 切换 ===== */
+.auth-tabs{display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid rgba(79,195,247,0.2);}
+.auth-tab{flex:1;padding:8px 0;font-size:13px;font-weight:600;color:rgba(179,229,252,0.5);background:transparent;border:none;cursor:pointer;transition:all .2s;}
+.auth-tab.active{color:#fff;background:rgba(79,195,247,0.2);}
 
 /* ===== 云同步状态指示 ===== */
 .sync-status{
@@ -2354,19 +2405,25 @@ button, .tab-item, .map-book-node, .unit-card, .book-pill, .btn-next,
 <!-- Supabase JS Client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
 
-<!-- Phone Login Modal -->
-<div class="phone-modal" id="phoneModal" style="display:none">
+<!-- Auth Login Modal -->
+<div class="phone-modal" id="authModal" style="display:none">
   <div class="phone-modal-backdrop"></div>
   <div class="phone-modal-content">
     <div class="phone-modal-icon">🌊</div>
     <div class="phone-modal-title">深海学院单词教练</div>
-    <div class="phone-modal-sub">输入手机号，开启深海探险之旅</div>
-    <div class="phone-modal-input-wrap">
-      <input type="tel" id="phoneInput" class="phone-input" placeholder="请输入手机号" maxlength="11" autocomplete="tel">
+    <div class="phone-modal-sub" id="authSubtitle">登录账号，同步学习进度</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="authTabLogin" onclick="switchAuthMode('login')">登录</button>
+      <button class="auth-tab" id="authTabRegister" onclick="switchAuthMode('register')">注册</button>
     </div>
-    <div class="phone-modal-error" id="phoneError"></div>
-    <button class="phone-modal-btn" id="phoneSubmitBtn" onclick="handlePhoneLogin()">开始探险 🚀</button>
-    <div class="phone-modal-hint">学习进度自动保存，换设备也能继续</div>
+    <div class="phone-modal-input-wrap">
+      <input type="email" id="authEmailInput" class="phone-input" placeholder="请输入邮箱" autocomplete="email" style="letter-spacing:0;font-size:15px;margin-bottom:10px;">
+      <input type="password" id="authPasswordInput" class="phone-input" placeholder="请输入密码（至少6位）" autocomplete="current-password" style="letter-spacing:1px;font-size:15px;">
+    </div>
+    <div class="phone-modal-error" id="authError"></div>
+    <button class="phone-modal-btn" id="authSubmitBtn" onclick="handleAuth()">登录 🚀</button>
+    <div class="phone-modal-hint">学习进度云端保存，换设备也能继续</div>
+    <div class="phone-modal-hint" id="authLocalOnly" style="margin-top:6px;cursor:pointer;color:rgba(179,229,252,0.6);text-decoration:underline;" onclick="skipAuth()">暂不登录，仅本地使用 →</div>
   </div>
 </div>
 
@@ -6829,152 +6886,331 @@ function getUnit(bookId, unitId) {
 function bookWords(bookId) { return ALL_BOOK_WORDS.filter(w => w.bookId === bookId); }
 function wkey(w) { return w.bookId + ':' + w.word; }
 
-// ===== 单词视觉：AI绘本插画（三上试点）→ emoji → 首字母徽章 三级回退 =====
-// 三上106词的绘本插画文件名（assets/words/ 下），含同义词/同图复用映射
+// ===== 单词视觉：AI绘本插画 → 首字母徽章 两级回退 =====
+// 插画文件名（assets/words/ 下），含同义词/同图复用映射及跨册复用
 const WORD_IMG = {
-  // U1 人物/身体
-  me:'g3u_me.webp', friend:'g3u_friend.webp', smile:'g3u_smile.webp',
-  ear:'g3u_ear.webp', eye:'g3u_eye.webp', hand:'g3u_hand.webp',
-  mouth:'g3u_mouth.webp', arm:'g3u_arm.webp',
-  // U2 家庭（核心图 + 称谓复用）
-  mum:'g3u_mum.webp', mother:'g3u_mum.webp',
-  dad:'g3u_dad.webp', father:'g3u_dad.webp',
-  grandma:'g3u_grandma.webp', grandmother:'g3u_grandma.webp',
-  grandpa:'g3u_grandpa.webp', grandfather:'g3u_grandpa.webp',
-  sister:'g3u_sister.webp', brother:'g3u_brother.webp',
-  cousin:'g3u_cousin.webp', uncle:'g3u_uncle.webp', aunt:'g3u_aunt.webp',
-  baby:'g3u_baby.webp', family:'g3u_family.webp',
-  // U3 动物
-  pet:'g3u_pet.webp', dog:'g3u_dog.webp', cat:'g3u_cat.webp', fish:'g3u_fish.webp',
-  bird:'g3u_bird.webp', rabbit:'g3u_rabbit.webp', fox:'g3u_fox.webp',
-  panda:'g3u_panda.webp', 'red panda':'g3u_red_panda.webp', monkey:'g3u_monkey.webp',
-  tiger:'g3u_tiger.webp', elephant:'g3u_elephant.webp', lion:'g3u_lion.webp',
-  giraffe:'g3u_giraffe.webp', duck:'g3u_duck.webp', bear:'g3u_bear.webp',
-  white:'g3u_white.webp', black:'g3u_black.webp',
-  // U4 植物/食物
-  apple:'g3u_apple.webp', banana:'g3u_banana.webp', grape:'g3u_grape.webp',
-  orange:'g3u_orange.webp', flower:'g3u_flower.webp', grass:'g3u_grass.webp',
-  tree:'g3u_tree.webp', sun:'g3u_sun.webp', water:'g3u_water.webp', air:'g3u_air.webp',
-  garden:'g3u_garden.webp', farm:'g3u_farm.webp',
-  // U5 颜色/场景
-  sea:'g3u_sea.webp', zoo:'g3u_zoo.webp',
-  red:'g3u_red.webp', yellow:'g3u_yellow.webp', blue:'g3u_blue.webp',
-  green:'g3u_green.webp', purple:'g3u_purple.webp', pink:'g3u_pink.webp',
-  brown:'g3u_bear.webp',
-  // U6
-  cake:'g3u_cake.webp'
+  // ---- 三上 ----
+  Miss:'g3u_Miss.webp',
+  air:'g3u_air.webp',
+  animal:'g3u_animal.webp',
+  apple:'g3u_apple.webp',
+  arm:'g3u_arm.webp',
+  aunt:'g3u_aunt.webp',
+  baby:'g3u_baby.webp',
+  banana:'g3u_banana.webp',
+  bird:'g3u_bird.webp',
+  black:'g3u_black.webp',
+  blue:'g3u_blue.webp',
+  brother:'g3u_brother.webp',
+  brown:'g3u_brown.webp',
+  cake:'g3u_cake.webp',
+  cat:'g3u_cat.webp',
+  colour:'g3u_colour.webp',
+  cousin:'g3u_cousin.webp',
+  cute:'g3u_cute.webp',
+  dad:'g3u_dad.webp',
+  dog:'g3u_dog.webp',
+  duck:'g3u_duck.webp',
+  ear:'g3u_ear.webp',
+  elephant:'g3u_elephant.webp',
+  eye:'g3u_eye.webp',
+  family:'g3u_family.webp',
+  farm:'g3u_farm.webp',
+  fast:'g3u_fast.webp',
+  fish:'g3u_fish.webp',
+  flower:'g3u_flower.webp',
+  fox:'g3u_fox.webp',
+  friend:'g3u_friend.webp',
+  garden:'g3u_garden.webp',
+  giraffe:'g3u_giraffe.webp',
+  grandma:'g3u_grandma.webp',
+  grandpa:'g3u_grandpa.webp',
+  grape:'g3u_grape.webp',
+  grass:'g3u_grass.webp',
+  green:'g3u_green.webp',
+  hand:'g3u_hand.webp',
+  lion:'g3u_lion.webp',
+  me:'g3u_me.webp',
+  monkey:'g3u_monkey.webp',
+  mouth:'g3u_mouth.webp',
+  mum:'g3u_mum.webp',
+  new:'g3u_new.webp',
+  orange:'g3u_orange.webp',
+  panda:'g3u_panda.webp',
+  pet:'g3u_pet.webp',
+  pink:'g3u_pink.webp',
+  plant:'g3u_plant.webp',
+  purple:'g3u_purple.webp',
+  rabbit:'g3u_rabbit.webp',
+  red:'g3u_red.webp',
+  'red panda':'g3u_red_panda.webp',
+  sea:'g3u_sea.webp',
+  sister:'g3u_sister.webp',
+  smile:'g3u_smile.webp',
+  sun:'g3u_sun.webp',
+  tall:'g3u_tall.webp',
+  tiger:'g3u_tiger.webp',
+  tree:'g3u_tree.webp',
+  uncle:'g3u_uncle.webp',
+  white:'g3u_white.webp',
+  year:'g3u_year.webp',
+  yellow:'g3u_yellow.webp',
+  zoo:'g3u_zoo.webp',
+  // ---- 三下 ----
+  bag:'g3l_bag.webp',
+  ball:'g3l_ball.webp',
+  boat:'g3l_boat.webp',
+  book:'g3l_book.webp',
+  box:'g3l_box.webp',
+  boy:'g3l_boy.webp',
+  bread:'g3l_bread.webp',
+  breakfast:'g3l_breakfast.webp',
+  candy:'g3l_candy.webp',
+  cap:'g3l_cap.webp',
+  car:'g3l_car.webp',
+  card:'g3l_card.webp',
+  classmate:'g3l_classmate.webp',
+  computer:'g3l_computer.webp',
+  dance:'g3l_dance.webp',
+  doll:'g3l_doll.webp',
+  egg:'g3l_egg.webp',
+  eraser:'g3l_eraser.webp',
+  face:'g3l_face.webp',
+  find:'g3l_find.webp',
+  fruit:'g3l_fruit.webp',
+  gift:'g3l_gift.webp',
+  girl:'g3l_girl.webp',
+  hear:'g3l_hear.webp',
+  home:'g3l_home.webp',
+  juice:'g3l_juice.webp',
+  learn:'g3l_learn.webp',
+  leg:'g3l_leg.webp',
+  love:'g3l_love.webp',
+  man:'g3l_man.webp',
+  map:'g3l_map.webp',
+  meat:'g3l_meat.webp',
+  neighbour:'g3l_neighbour.webp',
+  noodle:'g3l_noodle.webp',
+  nose:'g3l_nose.webp',
+  paper:'g3l_paper.webp',
+  pen:'g3l_pen.webp',
+  pencil:'g3l_pencil.webp',
+  picture:'g3l_picture.webp',
+  plate:'g3l_plate.webp',
+  rice:'g3l_rice.webp',
+  ruler:'g3l_ruler.webp',
+  see:'g3l_see.webp',
+  shelf:'g3l_shelf.webp',
+  sing:'g3l_sing.webp',
+  smell:'g3l_smell.webp',
+  soup:'g3l_soup.webp',
+  student:'g3l_student.webp',
+  tail:'g3l_tail.webp',
+  taste:'g3l_taste.webp',
+  teacher:'g3l_teacher.webp',
+  tongue:'g3l_tongue.webp',
+  touch:'g3l_touch.webp',
+  vegetable:'g3l_vegetable.webp',
+  woman:'g3l_woman.webp',
+  // ---- 四上 ----
+  'T-shirt':'g4u_T-shirt.webp',
+  autumn:'g4u_autumn.webp',
+  basketball:'g4u_basketball.webp',
+  buy:'g4u_buy.webp',
+  child:'g4u_child.webp',
+  clean:'g4u_clean.webp',
+  cleaner:'g4u_cleaner.webp',
+  coat:'g4u_coat.webp',
+  cook:'g4u_cook.webp',
+  doctor:'g4u_doctor.webp',
+  dress:'g4u_dress.webp',
+  driver:'g4u_driver.webp',
+  farmer:'g4u_farmer.webp',
+  film:'g4u_film.webp',
+  firefighter:'g4u_firefighter.webp',
+  floor:'g4u_floor.webp',
+  fly:'g4u_fly.webp',
+  football:'g4u_football.webp',
+  fun:'g4u_fun.webp',
+  glove:'g4u_glove.webp',
+  hair:'g4u_hair.webp',
+  hospital:'g4u_hospital.webp',
+  job:'g4u_job.webp',
+  kite:'g4u_kite.webp',
+  leaf:'g4u_leaf.webp',
+  library:'g4u_library.webp',
+  nurse:'g4u_nurse.webp',
+  park:'g4u_park.webp',
+  people:'g4u_people.webp',
+  photo:'g4u_photo.webp',
+  play:'g4u_play.webp',
+  playground:'g4u_playground.webp',
+  police:'g4u_police.webp',
+  rain:'g4u_rain.webp',
+  read:'g4u_read.webp',
+  room:'g4u_room.webp',
+  shirt:'g4u_shirt.webp',
+  shop:'g4u_shop.webp',
+  snow:'g4u_snow.webp',
+  snowman:'g4u_snowman.webp',
+  sock:'g4u_sock.webp',
+  speak:'g4u_speak.webp',
+  spring:'g4u_spring.webp',
+  story:'g4u_story.webp',
+  strong:'g4u_strong.webp',
+  summer:'g4u_summer.webp',
+  sweater:'g4u_sweater.webp',
+  sweep:'g4u_sweep.webp',
+  swim:'g4u_swim.webp',
+  toilet:'g4u_toilet.webp',
+  walk:'g4u_walk.webp',
+  wear:'g4u_wear.webp',
+  winter:'g4u_winter.webp',
+  // ---- 四下 ----
+  TV:'g4l_TV.webp',
+  bathroom:'g4l_bathroom.webp',
+  bedroom:'g4l_bedroom.webp',
+  bee:'g4l_bee.webp',
+  blackboard:'g4l_blackboard.webp',
+  bowl:'g4l_bowl.webp',
+  carrot:'g4l_carrot.webp',
+  chair:'g4l_chair.webp',
+  chicken:'g4l_chicken.webp',
+  chopsticks:'g4l_chopsticks.webp',
+  class:'g4l_class.webp',
+  classroom:'g4l_classroom.webp',
+  clock:'g4l_clock.webp',
+  clothes:'g4l_clothes.webp',
+  cow:'g4l_cow.webp',
+  desk:'g4l_desk.webp',
+  dinner:'g4l_dinner.webp',
+  door:'g4l_door.webp',
+  fan:'g4l_fan.webp',
+  feed:'g4l_feed.webp',
+  food:'g4l_food.webp',
+  fork:'g4l_fork.webp',
+  hat:'g4l_hat.webp',
+  homework:'g4l_homework.webp',
+  horse:'g4l_horse.webp',
+  house:'g4l_house.webp',
+  jacket:'g4l_jacket.webp',
+  kid:'g4l_kid.webp',
+  kitchen:'g4l_kitchen.webp',
+  knife:'g4l_knife.webp',
+  light:'g4l_light.webp',
+  loud:'g4l_loud.webp',
+  lunch:'g4l_lunch.webp',
+  milk:'g4l_milk.webp',
+  mouse:'g4l_mouse.webp',
+  newspaper:'g4l_newspaper.webp',
+  pick:'g4l_pick.webp',
+  pig:'g4l_pig.webp',
+  potato:'g4l_potato.webp',
+  run:'g4l_run.webp',
+  safe:'g4l_safe.webp',
+  salad:'g4l_salad.webp',
+  sheep:'g4l_sheep.webp',
+  shoe:'g4l_shoe.webp',
+  shorts:'g4l_shorts.webp',
+  skirt:'g4l_skirt.webp',
+  sleep:'g4l_sleep.webp',
+  spoon:'g4l_spoon.webp',
+  sunglasses:'g4l_sunglasses.webp',
+  supermarket:'g4l_supermarket.webp',
+  tomato:'g4l_tomato.webp',
+  trousers:'g4l_trousers.webp',
+  wall:'g4l_wall.webp',
+  wash:'g4l_wash.webp',
+  watch:'g4l_watch.webp',
+  wet:'g4l_wet.webp',
+  window:'g4l_window.webp',
+  workbook:'g4l_workbook.webp',
+  // ---- 五上 ----
+  answer:'g5u_answer.webp',
+  beef:'g5u_beef.webp',
+  brush:'g5u_brush_tooth.webp',
+  chess:'g5u_chess.webp',
+  coconut:'g5u_coconut.webp',
+  dumpling:'g5u_dumpling.webp',
+  exercise:'g5u_exercise.webp',
+  fire:'g5u_fire.webp',
+  flood:'g5u_flood.webp',
+  fog:'g5u_fog.webp',
+  forest:'g5u_forest.webp',
+  grandparent:'g5u_grandparent.webp',
+  hamburger:'g5u_hamburger.webp',
+  hotel:'g5u_hotel.webp',
+  hungry:'g5u_hungry.webp',
+  'ice cream':'g5u_ice_cream.webp',
+  jump_rope:'g5u_jump_rope.webp',
+  lake:'g5u_lake.webp',
+  lotus:'g5u_lotus.webp',
+  mountain:'g5u_mountain.webp',
+  parent:'g5u_parent.webp',
+  phone:'g5u_phone.webp',
+  piano:'g5u_piano.webp',
+  'ping-pong':'g5u_ping-pong.webp',
+  player:'g5u_player.webp',
+  raincoat:'g5u_raincoat.webp',
+  rest:'g5u_rest.webp',
+  river:'g5u_river.webp',
+  robot:'g5u_robot.webp',
+  root:'g5u_stem_root.webp',
+  seed:'g5u_seed.webp',
+  star:'g5u_star.webp',
+  stem:'g5u_stem_root.webp',
+  tea:'g5u_tea.webp',
+  team:'g5u_team.webp',
+  teeth:'g5u_brush_tooth.webp',
+  tooth:'g5u_brush_tooth.webp',
+  trip:'g5u_trip.webp',
+  umbrella:'g5u_umbrella.webp',
+  visit:'g5u_visit.webp',
+  waterfall:'g5u_waterfall.webp',
+  wind:'g5u_wind.webp',
+  // ---- 五下 ----
+  bamboo:'g5l_bamboo.webp',
+  cave:'g5l_cave.webp',
+  climbing:'g5l_climbing.webp',
+  dancing:'g5l_dancing.webp',
+  diary:'g5l_diary.webp',
+  drinking:'g5l_drinking.webp',
+  eating:'g5l_eating.webp',
+  exhibition:'g5l_exhibition.webp',
+  fur:'g5l_fur.webp',
+  island:'g5l_island.webp',
+  jumping:'g5l_jumping.webp',
+  kitten:'g5l_kitten.webp',
+  leaves:'g5l_leaves.webp',
+  letter:'g5l_letter.webp',
+  paint:'g5l_paint.webp',
+  picnic:'g5l_picnic.webp',
+  roll:'g5l_roll.webp',
+  sleeping:'g5l_sleeping.webp',
+  sushi:'g5l_sushi.webp',
+  vacation:'g5l_vacation.webp',
 };
 
-// emoji 映射（插画缺失或为虚词时使用；未收录词回退为首字母徽章）
-const WORD_EMOJI = {
-  // ---- 三上 g3u ----
-  name:'🏷️', nice:'😊', can:'💪', share:'🤝', listen:'👂', help:'🆘', say:'💬', good:'👍',
-  have:'🤲', big:'🐘', small:'🐜', like:'❤️', go:'🚶', Miss:'👩‍🏫', cute:'🥰',
-  animal:'🐾', tall:'🦒', fast:'⚡', new:'✨', need:'💧', give:'🎁', them:'🐟',
-  colour:'🌈', make:'🎨', draw:'🎨', old:'🎂', year:'📅', plant:'🌱',
-  one:'1️⃣', two:'2️⃣', three:'3️⃣', four:'4️⃣', five:'5️⃣', six:'6️⃣',
-  seven:'7️⃣', eight:'8️⃣', nine:'9️⃣', ten:'🔟', "o'clock":'🕐', cut:'🔪', eat:'🍽️', some:'🐟',
-  // ---- 三下 g3l ----
-  where:'📍', about:'💭', today:'📅', teacher:'👩‍🏫', student:'🧑‍🎓', girl:'👧',
-  neighbour:'🏘️', boy:'👦', woman:'👩', man:'👨', Mr:'👨‍💼', classmate:'🧑‍🤝‍🧑',
-  English:'🔤', UK:'🇬🇧', China:'🇨🇳', Canada:'🇨🇦', USA:'🇺🇸', long:'📏',
-  body:'🧍', short:'📏', leg:'🦵', right:'➡️', fat:'🐷', thin:'🐭', slow:'🐢',
-  love:'❤️', tail:'🐒', gift:'🎁', picture:'🖼️', card:'💌', sing:'🎤', dance:'💃',
-  face:'😀', talk:'💬', song:'🎵', eraser:'🧽', find:'🔎', ruler:'📏', pen:'🖊️',
-  pencil:'✏️', book:'📖', bag:'🎒', paper:'📄', see:'👀', smell:'👃', taste:'👅',
-  hear:'👂', touch:'✋', learn:'📚', nose:'👃', tongue:'👅', class:'🏫',
-  computer:'💻', breakfast:'🍳', time:'⏰', bread:'🍞', egg:'🥚', milk:'🥛',
-  noodle:'🍜', juice:'🧃', rice:'🍚', meat:'🥩', vegetable:'🥬', healthy:'💪',
-  plate:'🍽️', soup:'🍲', fruit:'🍎', colourful:'🌈', candy:'🍬', yummy:'😋',
-  boat:'⛵', cool:'😎', home:'🏠', ball:'⚽', doll:'🧸', car:'🚗', shelf:'🗄️',
-  box:'📦', cap:'🧢', map:'🗺️', eleven:'🔢', twelve:'🔢', thirteen:'🔢',
-  fourteen:'🔢', fifteen:'🔢', sixteen:'🔢', seventeen:'🔢', eighteen:'🔢',
-  nineteen:'🔢', twenty:'🔢', pay:'💳', back:'↩️',
-  // ---- 四上 g4u ----
-  PE:'🏃', job:'💼', doctor:'👨‍⚕️', farmer:'👨‍🌾', nurse:'👩‍⚕️', busy:'🐝',
-  tired:'😫', chore:'🧹', cook:'👨‍🍳', clean:'🧼', room:'🚪', sweep:'🧹',
-  together:'👫', people:'👥', child:'🧒', children:'🧒', hair:'💇', kind:'😇',
-  quiet:'🤫', best:'🏆', read:'📖', Chinese:'🇨🇳', play:'🎮', game:'🎮',
-  football:'⚽', basketball:'🏀', afternoon:'🌇', playground:'🛝', park:'🌳',
-  hospital:'🏥', shop:'🏬', toilet:'🚻', library:'📚', sport:'🏅', walk:'🚶',
-  community:'🏘️', favourite:'⭐', place:'📍', photo:'📷', story:'📖', buy:'🛒',
-  firefighter:'👨‍🚒', driver:'🚕', cleaner:'🧹', police:'👮', Ms:'👩‍🏫', speak:'🗣️',
-  weather:'🌤️', sunny:'☀️', hot:'🥵', cold:'🥶', windy:'🌬️', cloudy:'☁️',
-  rainy:'🌧️', snowy:'❄️', warm:'🌤️', rain:'🌧️', film:'🎬', idea:'💡',
-  fly:'🪁', kite:'🪁', snowman:'⇒', fun:'🎉', swim:'🏊', Sydney:'🇦🇺',
-  sweater:'🧶', sock:'🧦', wear:'👕', shirt:'👔', coat:'🧥', dress:'👗',
-  season:'🍂', winter:'❄️', snow:'❄️', spring:'🌸', summer:'☀️', autumn:'🍂',
-  'T-shirt':'👕', fall:'🍁', leaf:'🍁', leaves:'🍂', glove:'🧤',
-  // ---- 四下 g4l ----
-  sorry:'🙇', late:'⏰', ready:'✅', rule:'📋', classroom:'🏫', light:'💡',
-  blackboard:'📝', desk:'🪑', chair:'🪑', tidy:'🧹', music:'🎵', wall:'🧱',
-  door:'🚪', window:'🪟', fan:'🌀', understand:'🧠', newspaper:'📰', workbook:'📓',
-  watch:'⌚', TV:'📺', homework:'📝', first:'1️⃣', wet:'💧', run:'🏃',
-  safe:'🛡️', word:'🔤', wash:'🧼', sleep:'😴', bedroom:'🛏️',
-  kitchen:'🍳', bathroom:'🚿', work:'💼', think:'🤔', kid:'🧒',
-  dinner:'🍽️', art:'🎨', lunch:'🍱', maths:'🔢', clock:'🕐',
-  minute:'⏱️', trousers:'👖', clothes:'👚', shorts:'🩳', jacket:'🧥', skirt:'👗',
-  cheap:'🏷️', shoe:'👟', beautiful:'🌸', hat:'👒', sunglasses:'🕶️', large:'📏',
-  size:'📐', list:'📝', cow:'🐄', horse:'🐴', sheep:'🐑', pig:'🐷', chicken:'🐔',
-  tomato:'🍅', carrot:'🥕', potato:'🥔', bee:'🐝', mouse:'🐭', mice:'🐭',
-  fresh:'🥗', feed:'🍼', pick:'🍓', knife:'🔪', fork:'🍴', chopsticks:'🥢',
-  bowl:'🥣', spoon:'🥄', waste:'🗑️', food:'🍱', delicious:'😋', supermarket:'🛒',
-  week:'📅', salad:'🥗',
-  // ---- 五上 g5u ----
-  team:'👥', player:'⚽', lovely:'😍', clever:'🦊', young:'👶',
-  'hard-working':'💪', science:'🔬', robot:'🤖', jump:'🤸', rope:'🪢',
-  piano:'🎹', chess:'♟️', star:'⭐', Australia:'🇦🇺', sad:'😢', matter:'❓',
-  project:'📋', centre:'🏢', agree:'🤝', finish:'🏁', Monday:'📘', worried:'😟',
-  excited:'🤩', wrong:'❌', angry:'😠', afraid:'😨', parent:'👨‍👩', move:'🚚',
-  Wednesday:'📘', subject:'📚', Tuesday:'📘', Friday:'📘', Thursday:'📘',
-  start:'▶️', weekend:'📆', Saturday:'📘', Sunday:'📘', lesson:'📖',
-  evening:'🌆', answer:'🙋', 'ping-pong':'🏓', night:'🌙', visit:'🚶',
-  grandparent:'👴', stay:'🏠', flu:'🤧', exercise:'🏃', habit:'🔁', show:'🎭',
-  phone:'📱', rest:'😴', brush:'🪥', tooth:'🦷', teeth:'🦷', hour:'⏰',
-  free:'🆓', hungry:'🍽️', beef:'🥩', 'ice cream':'🍦', dumpling:'🥟', tea:'🍵',
-  hamburger:'🍔', Mrs:'👩', coconut:'🥥', seed:'🌱', stem:'🌿', root:'🌱',
-  lotus:'🪷', lake:'🏞️', world:'🌍', round:'⭕', way:'🛣️', river:'🌊',
-  nature:'🌿', waterfall:'💦', forest:'🌲', mountain:'⛰️', wind:'🌬️', trip:'🧳',
-  dangerous:'⚠️', hotel:'🏨', umbrella:'☂️', raincoat:'🧥', worry:'😟',
-  fine:'☀️', fog:'🌫️', flood:'🌊', fire:'🔥',
-  // ---- 五下 g5l ----
-  dancing:'💃', Spain:'🇪🇸', 'a.m.':'🌅', 'p.m.':'🌆', sound:'🔊', letter:'✉️',
-  live:'🏠', island:'🏝️', cave:'🕳️', win:'🏆', vacation:'🏖️', picnic:'🧺',
-  paint:'🎨', January:'📅', February:'📅', March:'📅', April:'📅', May:'📅',
-  June:'📅', July:'📅', August:'📅', September:'📅', October:'📅', November:'📅',
-  December:'📅', contest:'🏆', second:'2️⃣', third:'3️⃣', fourth:'4️⃣',
-  fifth:'5️⃣', twelfth:'12️⃣', twentieth:'20️⃣', special:'✨', fool:'🤡',
-  kitten:'🐱', diary:'📔', noise:'🔊', fur:'🐾', Easter:'🐣', national:'🎌',
-  American:'🇺🇸', Thanksgiving:'🦃', Christmas:'🎄', holiday:'🎉', roll:'🥚',
-  climbing:'🧗', eating:'🍴', playing:'🎮', jumping:'🤾', drinking:'🥤',
-  bamboo:'🎋', exhibition:'🖼️', sushi:'🍣', teach:'👩‍🏫', sure:'✅',
-  Canadian:'🇨🇦', Spanish:'💃'
-};
-
-// 单词视觉：插画 → emoji → 首字母徽章
+// 单词视觉：插画 → 首字母徽章（两级回退）
 function wordVisualHtml(w, sizeClass) {
   sizeClass = sizeClass || 'wv-flash';
   const img = WORD_IMG[w.word];
-  const emoji = WORD_EMOJI[w.word];
   if (img) {
     return '<span class="word-visual ' + sizeClass + '">' +
-      '<img class="wv-img" src="assets/words/' + img + '" alt="" loading="lazy" onerror="wordImgError(this)">' +
-      '<span class="wv-emoji" hidden>' + (emoji || '🐚') + '</span></span>';
-  }
-  if (emoji) {
-    return '<span class="word-visual ' + sizeClass + ' emoji-only">' + emoji + '</span>';
+      '<img class="wv-img" src="assets/words/' + img + '" alt="" loading="lazy" onerror="wordImgError(this)"></span>';
   }
   return '<span class="word-visual ' + sizeClass + ' letter-tile">' +
     (w.word.charAt(0) || '?').toUpperCase() + '</span>';
 }
 
-// 插画加载失败 → 回退 emoji（再失败显示首字母）
+// 插画加载失败 → 回退首字母徽章
 function wordImgError(imgEl) {
   const wrap = imgEl.parentElement;
   if (!wrap) return;
-  const emojiEl = wrap.querySelector('.wv-emoji');
+  const letter = (wrap.getAttribute('data-word') || '?').charAt(0).toUpperCase();
   imgEl.remove();
-  if (emojiEl) { emojiEl.hidden = false; wrap.classList.add('emoji-only'); }
+  wrap.classList.add('letter-tile');
+  wrap.textContent = letter;
 }
 
 // ===== 状态与进度 =====
@@ -7037,18 +7273,32 @@ function saveState() {
 }
 
 // ===== CLOUD SYNC (Supabase) =====
-// 配置占位——部署时替换为真实的 Supabase URL 和 anon key
-const SUPABASE_URL = '__SUPABASE_URL__';
-const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
+const SUPABASE_URL = 'https://vgvdylftcuplchercpup.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_GnRq-FtitYdJbCAth4kP3A_nZvxqFBh';
 let supabaseClient = null;
-let userPhone = localStorage.getItem('deepsea_phone') || '';
+let currentUser = null; // { id, email }
 let cloudSaveTimer = null;
 let isSyncing = false;
+let authMode = 'login'; // 'login' or 'register'
 
-function initSupabase() {
-  if (SUPABASE_URL === '__SUPABASE_URL__' || typeof window.supabase === 'undefined') {
-    console.warn('[Cloud] Supabase not configured, using local-only mode');
-    return false;
+async function initSupabase() {
+  // 动态加载 Supabase SDK，确保就绪
+  if (typeof window.supabase === 'undefined') {
+    try {
+      await new Promise((resolve, reject) => {
+        // 找到现有 script 标签并替换为可控加载
+        const existing = document.querySelector('script[src*="supabase-js"]');
+        if (existing) existing.remove();
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    } catch(e) {
+      console.warn('[Cloud] Supabase SDK load failed, using local-only mode');
+      return false;
+    }
   }
   try {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -7060,23 +7310,23 @@ function initSupabase() {
 }
 
 function scheduleCloudSave() {
-  if (!supabaseClient || !userPhone) return;
+  if (!supabaseClient || !currentUser) return;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(cloudSave, 2000);
 }
 
 async function cloudSave() {
-  if (!supabaseClient || !userPhone || isSyncing) return;
+  if (!supabaseClient || !currentUser || isSyncing) return;
   isSyncing = true;
   showSyncStatus('saving');
   try {
     const { error } = await supabaseClient
       .from('user_progress')
       .upsert({
-        phone: userPhone,
+        user_id: currentUser.id,
         state_data: state,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'phone' });
+      }, { onConflict: 'user_id' });
     if (error) throw error;
     showSyncStatus('saved');
   } catch(e) {
@@ -7086,13 +7336,13 @@ async function cloudSave() {
   isSyncing = false;
 }
 
-async function cloudLoad(phone) {
+async function cloudLoad(userId) {
   if (!supabaseClient) return null;
   try {
     const { data, error } = await supabaseClient
       .from('user_progress')
       .select('state_data')
-      .eq('phone', phone)
+      .eq('user_id', userId)
       .single();
     if (error || !data) return null;
     return data.state_data;
@@ -7133,6 +7383,119 @@ function mergeState(local, cloud) {
   merged.streak = Math.max(local.streak || 0, merged.streak || 0);
   merged.totalDays = Math.max(local.totalDays || 0, merged.totalDays || 0);
   return merged;
+}
+
+// ===== Auth Modal (Email + Password) =====
+function showAuthModal() {
+  const modal = document.getElementById('authModal');
+  if (modal) modal.style.display = 'flex';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authEmailInput').value = '';
+  document.getElementById('authPasswordInput').value = '';
+  authMode = 'login';
+  updateAuthMode();
+}
+
+function switchAuthMode(mode) {
+  authMode = mode;
+  updateAuthMode();
+}
+
+function updateAuthMode() {
+  const tabLogin = document.getElementById('authTabLogin');
+  const tabRegister = document.getElementById('authTabRegister');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const subtitle = document.getElementById('authSubtitle');
+  const pwInput = document.getElementById('authPasswordInput');
+
+  if (authMode === 'login') {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    submitBtn.textContent = '登录 🚀';
+    subtitle.textContent = '登录账号，同步学习进度';
+    pwInput.setAttribute('autocomplete', 'current-password');
+  } else {
+    tabLogin.classList.remove('active');
+    tabRegister.classList.add('active');
+    submitBtn.textContent = '注册并开启 🚀';
+    subtitle.textContent = '创建账号，开启深海探险之旅';
+    pwInput.setAttribute('autocomplete', 'new-password');
+  }
+  document.getElementById('authError').textContent = '';
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmailInput').value.trim().toLowerCase();
+  const password = document.getElementById('authPasswordInput').value;
+  const errEl = document.getElementById('authError');
+  if (!email || !validateEmail(email)) { errEl.textContent = '请输入正确的邮箱地址'; return; }
+  if (!password || password.length < 6) { errEl.textContent = '密码至少6位'; return; }
+
+  document.getElementById('authSubmitBtn').disabled = true;
+  document.getElementById('authSubmitBtn').textContent = '请稍候...';
+  errEl.textContent = '';
+
+  try {
+    let result;
+    if (authMode === 'login') {
+      result = await supabaseClient.auth.signInWithPassword({ email, password });
+    } else {
+      result = await supabaseClient.auth.signUp({ email, password });
+    }
+    const { data, error } = result;
+    if (error) throw error;
+
+    if (data.session) {
+      await onAuthSuccess(data.user, email);
+    } else if (data.user && !data.session) {
+      await onAuthSuccess(data.user, email);
+    }
+  } catch(e) {
+    const msg = e.message || '';
+    if (msg.includes('Invalid login credentials')) {
+      errEl.textContent = '邮箱或密码不正确';
+    } else if (msg.includes('User already registered')) {
+      errEl.textContent = '该邮箱已注册，请切换登录';
+    } else if (msg.includes('Password')) {
+      errEl.textContent = '密码不符合要求（至少6位）';
+    } else {
+      errEl.textContent = msg || '操作失败，请重试';
+    }
+    document.getElementById('authSubmitBtn').disabled = false;
+    document.getElementById('authSubmitBtn').textContent = authMode === 'login' ? '登录 🚀' : '注册并开启 🚀';
+  }
+}
+
+async function onAuthSuccess(user, email) {
+  currentUser = { id: user.id, email: email };
+  const modal = document.getElementById('authModal');
+  if (modal) modal.style.display = 'none';
+
+  // Try to load cloud progress
+  const cloudState = await cloudLoad(currentUser.id);
+  if (cloudState) {
+    const localHasData = state.wordResults && Object.keys(state.wordResults).length > 0;
+    const cloudHasData = cloudState.wordResults && Object.keys(cloudState.wordResults).length > 0;
+    if (cloudHasData && (!localHasData || (cloudState.updatedAt || 0) > (state.updatedAt || 0))) {
+      Object.assign(state, cloudState);
+      saveState();
+      showSyncStatus('loaded');
+    }
+  }
+
+  afterLogin();
+  scheduleCloudSave();
+}
+
+function skipAuth() {
+  const modal = document.getElementById('authModal');
+  if (modal) modal.style.display = 'none';
+  currentUser = null;
+  afterLogin();
 }
 
 function showSyncStatus(status) {
@@ -7177,58 +7540,6 @@ function closeModal() {
   if (modal) modal.classList.remove('show');
 }
 
-function showPhoneModal() {
-  const modal = document.getElementById('phoneModal');
-  if (modal) modal.style.display = 'flex';
-}
-
-function hidePhoneModal() {
-  const modal = document.getElementById('phoneModal');
-  if (modal) modal.style.display = 'none';
-}
-
-function validatePhone(phone) {
-  return /^1[3-9]\d{9}$/.test(phone);
-}
-
-async function handlePhoneLogin() {
-  const input = document.getElementById('phoneInput');
-  const errEl = document.getElementById('phoneError');
-  const btn = document.getElementById('phoneSubmitBtn');
-  if (!input || !errEl || !btn) return;
-  const phone = input.value.trim();
-  if (!validatePhone(phone)) {
-    errEl.textContent = '请输入正确的11位手机号';
-    return;
-  }
-  errEl.textContent = '';
-  btn.disabled = true;
-  btn.textContent = '连接中...';
-  
-  // 保存手机号到本地
-  userPhone = phone;
-  localStorage.setItem('deepsea_phone', phone);
-  
-  // 尝试从云端加载
-  const cloudData = await cloudLoad(phone);
-  if (cloudData) {
-    // 云端有数据，合并
-    state = mergeState(state, cloudData);
-    saveState(); // 保存合并后的数据到本地（不触发再次云同步）
-    showSyncStatus('loaded');
-  }
-  
-  hidePhoneModal();
-  btn.disabled = false;
-  btn.textContent = '开始探险 🚀';
-  
-  // 继续初始化流程
-  afterLogin();
-  // 隐藏加载提示
-  var lo = document.getElementById('loadingOverlay');
-  if (lo) { lo.style.opacity = '0'; setTimeout(function(){ lo.style.display = 'none'; }, 400); }
-}
-
 function dismissWelcome() {
   var cb = document.getElementById('welcomeNoMore');
   if (cb && cb.checked) {
@@ -7242,6 +7553,10 @@ function dismissWelcome() {
   }, 600);
 }
 
+// 懒渲染标记：Library 和 Me 页切到时才首次渲染，减少首屏开销
+let _libraryRendered = false;
+let _meRendered = false;
+
 function afterLogin() {
   // 欢迎界面：首次或未标记跳过时显示
   var splash = document.getElementById('welcomeSplash');
@@ -7251,12 +7566,11 @@ function afterLogin() {
   } else if (splash) {
     splash.style.display = 'none';
   }
+  // 首屏只渲染必要内容（地图入口 + 顶部状态），Library/Me 延迟到切 tab 时
   renderBookPills();
   updateLearnWelcome();
   renderUnitGrid();
   renderGoalStrip();
-  renderLibrary();
-  renderMe();
   updateHeader();
   
   if (!localStorage.getItem('deepsea_welcomed')) {
@@ -7265,13 +7579,15 @@ function afterLogin() {
   }
   openMapOverlay();
   
-  // 到期复习提醒
-  const reviewWords = getReviewWords();
-  if (reviewWords.length > 0) {
-    setTimeout(() => {
-      showCharBubble('shelly', '有 ' + reviewWords.length + ' 个单词该复习啦，去学习页面看看吧～', 4000);
-    }, 2000);
-  }
+  // 下一帧再处理复习提醒，让首屏渲染更快完成
+  requestAnimationFrame(() => {
+    const reviewWords = getReviewWords();
+    if (reviewWords.length > 0) {
+      setTimeout(() => {
+        showCharBubble('shelly', '有 ' + reviewWords.length + ' 个单词该复习啦，去学习页面看看吧～', 4000);
+      }, 2000);
+    }
+  });
 }
 
 function wsOf(w) { return state.words[wkey(w)]; }
@@ -7866,6 +8182,7 @@ function switchTab(idx) {
   });
   tabItems().forEach((item, i) => item.classList.toggle('active', i === idx));
   currentTab = idx;
+  // 懒渲染：首次切到该 tab 时才渲染
   if (idx === 1) renderLibrary();
   if (idx === 2) renderMe();
 }
@@ -8866,6 +9183,7 @@ function continueLearning() {
 let libViewingUnit = null;
 
 function renderLibrary() {
+  _libraryRendered = true;
   try {
   const list = document.getElementById('libUnitList');
   const wordList = document.getElementById('libWordList');
@@ -8971,6 +9289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== ME TAB（总进度 + 6册海域进度） =====
 function renderMe() {
+  _meRendered = true;
   try {
   const me = document.getElementById('meContent');
   if (!me) { console.warn('renderMe: DOM element meContent not found'); return; }
@@ -8996,16 +9315,16 @@ function renderMe() {
       '<div class="mbr-pct">' + (unlocked ? pct + '%' : '🔒') + '</div></div>';
   }).join('');
 
-  // 手机号显示（云同步状态）
-  const phoneHtml = userPhone ?
+  // 账号显示（云同步状态）
+  const accountHtml = currentUser ?
     '<div class="my-phone-display">' +
       '<span class="phone-label">☁️ 学习账号</span>' +
-      '<span class="phone-value">' + userPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + '</span>' +
+      '<span class="phone-value" style="font-size:13px;letter-spacing:0;">' + currentUser.email + '</span>' +
     '</div>' :
     (supabaseClient ?
-      '<div class="my-phone-display" style="cursor:pointer;" onclick="showPhoneModal()">' +
+      '<div class="my-phone-display" style="cursor:pointer;" onclick="showAuthModal()">' +
         '<span class="phone-label">☁️ 云同步</span>' +
-        '<span class="phone-value" style="color:#FF8A65;">点击绑定手机号 →</span>' +
+        '<span class="phone-value" style="color:#FF8A65;">点击登录/注册 →</span>' +
       '</div>' : '');
 
   // === 错词本入口 ===
@@ -9057,7 +9376,7 @@ function renderMe() {
       '<div class="me-stat" data-icon="🐚"><div class="me-stat-num">' + mastered + '/' + total + '</div><div class="me-stat-label">已掌握</div></div>' +
     '</div>' +
 
-    phoneHtml +
+    accountHtml +
 
     '<div class="me-depth-card">' +
       '<div class="me-depth-title">🌊 6大海域总下潜深度</div>' +
@@ -9293,7 +9612,7 @@ function updateHeader() {
 }
 
 // ===== INIT =====
-function init() {
+async function init() {
   loadState();
   initSpeech();
   createBubbles();
@@ -9314,20 +9633,35 @@ function init() {
   if (mapHint) mapHint.textContent = getBookDepth(currentBookId) + '米';
 
   // 初始化云同步
-  const cloudReady = initSupabase();
+  const cloudReady = await initSupabase();
   
-  // 检查是否已有手机号
-  if (cloudReady && !userPhone) {
-    // 没有手机号，显示登录弹窗
-    showPhoneModal();
-    // 隐藏加载提示
-    var lo = document.getElementById('loadingOverlay');
-    if (lo) { lo.style.opacity = '0'; setTimeout(function(){ lo.style.display = 'none'; }, 400); }
-    return; // 等登录成功后再调用 afterLogin
+  // 检查是否已有登录会话
+  if (cloudReady) {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session && session.user) {
+      // 已有登录会话，直接使用
+      currentUser = { id: session.user.id, email: session.user.email };
+      // 尝试从云端加载进度
+      const cloudState = await cloudLoad(currentUser.id);
+      if (cloudState) {
+        const localHasData = state.wordResults && Object.keys(state.wordResults).length > 0;
+        const cloudHasData = cloudState.wordResults && Object.keys(cloudState.wordResults).length > 0;
+        if (cloudHasData && (!localHasData || (cloudState.updatedAt || 0) > (state.updatedAt || 0))) {
+          Object.assign(state, cloudState);
+          saveState();
+          showSyncStatus('loaded');
+        }
+      }
+      afterLogin();
+    } else {
+      // 没有登录，显示登录弹窗
+      showAuthModal();
+    }
+  } else {
+    // 未配置云同步，直接进入本地模式
+    afterLogin();
   }
   
-  // 已有手机号或未配置云同步，直接进入
-  afterLogin();
   // 隐藏加载提示
   var lo = document.getElementById('loadingOverlay');
   if (lo) { lo.style.opacity = '0'; setTimeout(function(){ lo.style.display = 'none'; }, 400); }
